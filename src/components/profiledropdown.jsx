@@ -8,10 +8,13 @@ import {
   HelpCircle,
   ChevronDown,
 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
+
+  const navigate = useNavigate()
 
   const user = {
     name: "Dr. Sarah Smith",
@@ -22,7 +25,7 @@ function ProfileDropdown() {
   }
 
   const handleLogout = () => {
-    window.location.href = "/auth/login"
+    navigate("/")
   }
 
   const getRoleBadgeColor = (role) => {

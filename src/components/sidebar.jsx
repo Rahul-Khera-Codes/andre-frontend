@@ -12,15 +12,15 @@ import {
 import { useNavigate } from "react-router-dom"
 
 const navigationItems = [
-  { icon: Mail, label: "Email Automation", count: 12, href: "/inbox" },
+  { icon: Mail, label: "Email Automation", count: 12, href: "#" },
   { icon: CheckSquare, label: "Task Management", count: 8, href: "task-management" },
-  { icon: FileText, label: "Document Review", count: 3, href: "/documents" },
-  { icon: Bot, label: "AI Drafts", count: 5, href: "/drafts" },
-  { icon: Calendar, label: "Calendar Integration", href: "/reminders" },
-  { icon: BarChart3, label: "Analytics", href: "/analytics" },
-  { icon: Archive, label: "Archive", href: "/archive" },
-  { icon: Shield, label: "Security", href: "/security" },
-  { icon: Settings, label: "Settings", href: "/settings" },
+  { icon: FileText, label: "Document Review", count: 3, href: "#" },
+  { icon: Bot, label: "AI Drafts", count: 5, href: "ai-draft" },
+  { icon: Calendar, label: "Calendar Integration", href: "#" },
+  { icon: BarChart3, label: "Analytics", href: "#" },
+  { icon: Archive, label: "Archive", href: "#" },
+  { icon: Shield, label: "Security", href: "#" },
+  { icon: Settings, label: "Settings", href: "#" },
 ]
 
 function Sidebar() {

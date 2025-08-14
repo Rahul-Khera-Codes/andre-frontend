@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Shield, Mail, Lock, Eye, EyeOff, AlertTriangle } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google"
+import { authLogin } from "../apis/auth"
 
 const Login = () => {
   const navigate = useNavigate()
@@ -31,24 +32,30 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setSuccess("")
-    if (!validateForm()) {
-      return
-    }
+    if (!validateForm()) return
+
     setIsLoading(true)
 
-    setTimeout(() => {
-      if (formData.email === "admin@biotech.com" && formData.password === "password") {
-        setSuccess("successfully Loginned.")
-        navigate("/")
-      } else {
-        setErrors({ email: "Invalid email", password: "Invalid password" })
-        // setErrors("Invalid email or password. Please try again.")
+    try {
+      const payload = {
+        password: formData.password,
+        email: formData.email
       }
+      const response = await authLogin(payload);
+      console.log(response)
+      if (response?.status === 200) {
+        navigate("/dashboard")
+      } else {
+        setIsLoading(false)
+      }
+
+    } catch (error) {
+      console.log(error)
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const handleInputChange = (field, value) => {
@@ -168,9 +175,9 @@ const Login = () => {
             </button>
           </form>
           <div className="w-full flex items-center gap-2">
-            <hr style={{ color: "lightgrey", width:"48%" }} />
+            <hr style={{ color: "lightgrey", width: "48%" }} />
             or
-            <hr style={{ color: "lightgrey", width:"48%" }} />
+            <hr style={{ color: "lightgrey", width: "48%" }} />
           </div>
           <button onClick={() => loginGoogle()} className="w-full flex cursor-pointer items-center font-[600] text-[#5A687C] text-[14px] justify-center border border-gray-300 py-[14px] rounded-[8px] hover:bg-gray-100 transition">
             <FcGoogle className="mr-2 text-xl" /> Continue with Google

@@ -7,6 +7,7 @@ import ResetPassword from './pages/resetpassword'
 import Dashboard from './pages/dashboard/layout'
 import Home from './pages/dashboard/Home'
 import TaskManagement from './pages/dashboard/taskmanagement'
+import AIDraftReview from './pages/dashboard/AIdraft'
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
         <Route path='/dashboard' element={<Dashboard />}>
           <Route path='' element={<Home />} />
           <Route path='task-management' element={<TaskManagement />} />
+          <Route path='ai-draft' element={<AIDraftReview />} />
         </Route>
       </Routes>
     </div>
