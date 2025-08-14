@@ -59,6 +59,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setSuccess("")
+        setErrors({})
         if (!validateForm()) return
 
         setIsLoading(true)
@@ -71,9 +72,10 @@ const Register = () => {
             }
             const response = await authRegister(payload);
             console.log(response)
-            if (response?.status === 200) {
+            if (response?.status === 201) {
                 navigate("/")
             } else {
+                setErrors((prev) => ({ ...prev, detail: response?.response?.data?.detail }))
                 setIsLoading(false)
             }
 
@@ -125,7 +127,7 @@ const Register = () => {
                         <div className="flex items-start gap-2 p-3 bg-red-800 border border-red-200 rounded text-sm">
                             <AlertTriangle className="w-4 h-4 mt-0.5" color="white" />
                             <span className="text-white">
-                                Please fix the errors below
+                                {errors?.detail ?? 'Please fix the errors below'}
                             </span>
                         </div>
                     )}

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Shield, Mail, Lock, Eye, EyeOff, AlertTriangle } from "lucide-react"
+import { Shield, Mail, Lock, Eye, EyeOff, AlertTriangle, User } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google"
 import { authLogin } from "../apis/auth"
@@ -8,7 +8,7 @@ import { authLogin } from "../apis/auth"
 const Login = () => {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
     rememberMe: false,
   })
@@ -21,11 +21,13 @@ const Login = () => {
   const validateForm = () => {
     const newErrors = {};
     const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-    if (formData.email === '') {
-      newErrors.email = "Email is required"
-    } else {
-      if (!validateEmail(formData.email)) newErrors.email = "Invalid email format"
-    }
+    if (!formData.username.trim()) newErrors.username = "User name is required"
+
+    // if (formData.email === '') {
+    //   newErrors.email = "Email is required"
+    // } else {
+    //   if (!validateEmail(formData.email)) newErrors.email = "Invalid email format"
+    // }
     if (formData.password === '') newErrors.password = "Password is required"
 
     setErrors(newErrors);
@@ -35,6 +37,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSuccess("")
+    setErrors({})
     if (!validateForm()) return
 
     setIsLoading(true)
@@ -42,13 +45,14 @@ const Login = () => {
     try {
       const payload = {
         password: formData.password,
-        email: formData.email
+        username: formData.username
       }
       const response = await authLogin(payload);
       console.log(response)
       if (response?.status === 200) {
         navigate("/dashboard")
       } else {
+        setErrors((prev)=>({...prev,detail:response?.response?.data?.detail}))
         setIsLoading(false)
       }
 
@@ -96,7 +100,7 @@ const Login = () => {
             <div className="flex items-start gap-2 p-3 bg-red-800 border border-red-200 rounded text-sm">
               <AlertTriangle className="w-4 h-4 mt-0.5" color="white" />
               <span className="text-white">
-                Please fix the errors below
+                {errors?.detail ?? 'Please fix the errors below'}
               </span>
             </div>
           )}
@@ -107,21 +111,21 @@ const Login = () => {
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
-                Email Address
+              <label htmlFor="username" className="block text-sm font-medium text-slate-700 mb-1">
+                User Name
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <input
-                  id="email"
+                  id="username"
                   type="text"
-                  placeholder="you@biotech.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  placeholder="Enter your name"
+                  value={formData.username}
+                  onChange={(e) => handleInputChange("username", e.target.value)}
                   className="w-full pl-10 py-2 border border-gray-200  rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
                 />
               </div>
-              {errors?.email && <p className="text-red-500 py-2 text-sm">{errors?.email}</p>}
+              {errors?.username && <p className="text-red-500 py-2 text-sm">{errors?.username}</p>}
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
