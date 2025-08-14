@@ -1,0 +1,19 @@
+*{
+    font-family: "Onest", sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e1e4ea;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(188, 185, 185);
+  border-radius: 8px;
+  border: 2px solid #e1e4ea;
+}
