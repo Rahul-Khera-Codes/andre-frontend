@@ -29,3 +29,13 @@ export const authPasswordChange = async (payload) => {
         return error;
     }
 };
+
+export const authMicroSoftDetails = async () => {
+    try {
+        const response = await axiosInstance.get("/microsoft/get/microsoft/accounts");
+        return response;
+    } catch (error) {
+        console.error(error);
+        return error;
+    }
+};

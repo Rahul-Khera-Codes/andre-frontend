@@ -8,6 +8,8 @@ import Dashboard from './pages/dashboard/layout'
 import Home from './pages/dashboard/Home'
 import TaskManagement from './pages/dashboard/taskmanagement'
 import AIDraftReview from './pages/dashboard/AIdraft'
+import Settings from './pages/dashboard/Settings'
+import CalendarManagement from './pages/dashboard/CalendarIntegration'
 
 function App() {
 
@@ -22,6 +24,8 @@ function App() {
           <Route path='' element={<Home />} />
           <Route path='task-management' element={<TaskManagement />} />
           <Route path='ai-draft' element={<AIDraftReview />} />
+          <Route path='settings' element={<Settings />} />
+          <Route path='calendar-management' element={<CalendarManagement />} />
         </Route>
       </Routes>
     </div>

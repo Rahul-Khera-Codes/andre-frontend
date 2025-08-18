@@ -1,9 +1,13 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
 import { Lock, Shield, Eye, EyeOff, AlertTriangle } from "lucide-react"
+import Loader from "../components/loader"
 
 const ResetPassword = () => {
   const navigate = useNavigate()
+  const path = useLocation();
+  const query = new URLSearchParams(path.search);
+  const query_token = query.get('token');
   const [formData, setFormData] = useState({
     password: "",
     confirmPassword: "",
@@ -13,6 +17,12 @@ const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  useEffect(() => {
+    if (!query_token) {
+      navigate("/")
+    }
+  }, [])
 
   const validateForm = () => {
     const newErrors = {}
@@ -52,6 +62,8 @@ const ResetPassword = () => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     setErrors((prev) => ({ ...prev, [field]: "" }))
   }
+
+  if (!query_token) return <Loader />
 
   return (
     <div className="h-full overflow-auto bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">

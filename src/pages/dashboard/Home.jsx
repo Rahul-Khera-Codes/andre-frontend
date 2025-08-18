@@ -7,17 +7,18 @@ import {
   Bot,
   Calendar,
 } from "lucide-react"
+import { useSelector } from "react-redux"
+import Loader from "../../components/loader"
 
 function Home() {
+  const userDetails = useSelector((state) => state.profile)
+  if (userDetails?.loading) return <Loader />
   return (
     <div className="space-y-6 h-full overflow-auto p-3">
-      {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-100 to-green-100 rounded-lg p-6">
-        <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2">Welcome back, Dr. Smith</h2>
+        <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2">Welcome back, {userDetails?.user[0]?.given_name?.[0].toUpperCase() + userDetails?.user[0]?.given_name?.slice(1)}</h2>
         <p className="text-slate-600">You have 12 pending email automations and 8 active tasks requiring attention.</p>
       </div>
-
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { title: "Active Tasks", value: "23", icon: <CheckCircle className="h-4 w-4 text-slate-500" />, note: "+2 from yesterday" },
@@ -35,10 +36,7 @@ function Home() {
           </div>
         ))}
       </div>
-
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Email Automations */}
         <div className="bg-white border border-slate-200 rounded-lg shadow-sm lg:col-span-2">
           <div className="p-4 border-b border-slate-100">
             <div className="flex items-center gap-2 text-base font-semibold">
@@ -77,13 +75,12 @@ function Home() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${
-                      email.status === "sent"
-                        ? "bg-blue-100 text-blue-700"
-                        : email.status === "draft"
+                    className={`text-xs px-2 py-0.5 rounded-full ${email.status === "sent"
+                      ? "bg-blue-100 text-blue-700"
+                      : email.status === "draft"
                         ? "bg-yellow-100 text-yellow-700"
                         : "bg-slate-100 text-slate-700"
-                    }`}
+                      }`}
                   >
                     {email.status}
                   </span>
@@ -93,8 +90,6 @@ function Home() {
             ))}
           </div>
         </div>
-
-        {/* Upcoming Tasks */}
         <div className="bg-white border border-slate-200 rounded-lg shadow-sm">
           <div className="p-4 border-b border-slate-100">
             <div className="flex items-center gap-2 text-base font-semibold">
@@ -123,13 +118,12 @@ function Home() {
             ].map((task, index) => (
               <div key={index} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
                 <div
-                  className={`w-2 h-2 rounded-full mt-2 ${
-                    task.priority === "high"
-                      ? "bg-red-500"
-                      : task.priority === "medium"
+                  className={`w-2 h-2 rounded-full mt-2 ${task.priority === "high"
+                    ? "bg-red-500"
+                    : task.priority === "medium"
                       ? "bg-yellow-500"
                       : "bg-green-500"
-                  }`}
+                    }`}
                 />
                 <div className="flex-1">
                   <p className="font-medium text-sm">{task.task}</p>
@@ -148,7 +142,7 @@ function Home() {
           <p className="text-sm text-slate-500 mt-1">Streamline your workflows with automated email notifications</p>
         </div>
         <div className="p-4 flex flex-wrap gap-3">
-          <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+          <button className="flex items-center bg-green-800 text-white px-4 py-2 rounded-md hover:bg-green-900 cursor-pointer transition">
             <Bot className="w-4 h-4 mr-2" />
             Generate AI Draft
           </button>

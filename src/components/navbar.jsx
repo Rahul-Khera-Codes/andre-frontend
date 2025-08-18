@@ -1,12 +1,14 @@
 import { Bell, Search, Settings } from "lucide-react"
 import ProfileDropdown from "./profiledropdown"
+import { useNavigate } from "react-router-dom"
 
 function Navbar() {
+  const navigate = useNavigate();
   return (
     <header className="bg-white border-b h-full border-slate-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate("/dashboard")}>
             <div className="w-8 h-8 bg-green-800 rounded-lg flex items-center justify-center">
               <div className="w-4 h-4 bg-white rounded-sm"></div>
             </div>
@@ -31,7 +33,7 @@ function Navbar() {
           <button className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-slate-100 transition">
             <Settings className="w-5 h-5 text-slate-700" />
           </button>
-          <ProfileDropdown/>
+          <ProfileDropdown />
         </div>
       </div>
     </header>

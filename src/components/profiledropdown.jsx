@@ -9,23 +9,34 @@ import {
   ChevronDown,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import { discardData } from "../store/profileSlice"
 
 function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false)
+  const [user, setUser] = useState({})
   const dropdownRef = useRef(null)
+  const userDetails = useSelector((state) => state.profile)
+  const dispatch = useDispatch()
 
   const navigate = useNavigate()
 
-  const user = {
-    name: "Dr. Sarah Smith",
-    email: "sarah.smith@biotech.com",
-    role: "Senior Researcher",
-    department: "Clinical Research",
-    avatar: "/placeholder.svg",
-  }
+  useEffect(() => {
+    if (userDetails?.user) {
+      const details = userDetails?.user[0];
+      setUser({
+        name: details?.given_name?.[0].toUpperCase() + details?.given_name?.slice(1) + " " + details?.surname?.[0].toUpperCase() + details?.surname?.slice(1),
+        email: details?.mail,
+        avatar: "/placeholder.svg",
+      })
+    }
+
+  }, [userDetails])
 
   const handleLogout = () => {
     navigate("/")
+    dispatch(discardData())
+    localStorage.clear()
   }
 
   const getRoleBadgeColor = (role) => {
@@ -64,10 +75,10 @@ function ProfileDropdown() {
         <div className="h-8 w-8 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center">
           <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
         </div>
-        <div className="hidden md:block text-left">
+        {/* <div className="hidden md:block text-left">
           <p className="text-sm font-medium">{user.name}</p>
           <p className="text-xs text-slate-500">{user.role}</p>
-        </div>
+        </div> */}
         <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"
           }`} />
       </button>
@@ -82,13 +93,13 @@ function ProfileDropdown() {
               <div className="flex-1">
                 <p className="font-medium">{user.name}</p>
                 <p className="text-xs text-slate-500">{user.email}</p>
-                <span
+                {/* <span
                   className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs ${getRoleBadgeColor(
                     user.role
                   )}`}
                 >
                   {user.role}
-                </span>
+                </span> */}
               </div>
             </div>
           </div>
@@ -97,7 +108,7 @@ function ProfileDropdown() {
             <li className="px-4 py-2 hover:bg-slate-100 flex items-center cursor-pointer">
               <User className="w-4 h-4 mr-2" /> Profile Settings
             </li>
-            <li className="px-4 py-2 hover:bg-slate-100 flex items-center cursor-pointer">
+            {/* <li className="px-4 py-2 hover:bg-slate-100 flex items-center cursor-pointer">
               <Bell className="w-4 h-4 mr-2" />
               Notifications
               <span className="ml-auto text-xs bg-slate-200 px-2 py-0.5 rounded-full">3</span>
@@ -107,7 +118,7 @@ function ProfileDropdown() {
             </li>
             <li className="px-4 py-2 hover:bg-slate-100 flex items-center cursor-pointer">
               <Shield className="w-4 h-4 mr-2" /> Security & Privacy
-            </li>
+            </li> */}
             <li className="border-t border-slate-100 px-4 py-2 hover:bg-slate-100 flex items-center cursor-pointer">
               <HelpCircle className="w-4 h-4 mr-2" /> Help & Support
             </li>
