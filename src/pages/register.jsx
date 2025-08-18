@@ -12,6 +12,7 @@ import {
 import { FcGoogle } from "react-icons/fc"
 import { useGoogleLogin } from "@react-oauth/google"
 import { authRegister } from "../apis/auth"
+import { BsMicrosoftTeams } from "react-icons/bs"
 
 const Register = () => {
     const navigate = useNavigate()
@@ -99,6 +100,11 @@ const Register = () => {
     const registerGoogle = useGoogleLogin({
         onSuccess: handleGoogleRegister,
     });
+
+    const handleMicrosoftLogin = async () => {
+        const path = import.meta.env.VITE_OAUTH_MICROSOFT_URL
+        window.open(path)
+    }
 
     return (
         <div className="h-full overflow-auto bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
@@ -221,8 +227,8 @@ const Register = () => {
                         or
                         <hr style={{ color: "lightgrey", width: "48%" }} />
                     </div>
-                    <button onClick={() => registerGoogle()} className="w-full flex cursor-pointer items-center font-[600] text-[#5A687C] text-[14px] justify-center border border-gray-300 py-[14px] rounded-[8px] hover:bg-gray-100 transition">
-                        <FcGoogle className="mr-2 text-xl" /> Continue with Google
+                    <button onClick={handleMicrosoftLogin} className="w-full flex cursor-pointer items-center font-[600] text-[#5A687C] text-[14px] justify-center border border-gray-300 py-[14px] rounded-[8px] hover:bg-gray-100 transition">
+                        <BsMicrosoftTeams className="mr-2 text-xl" /> Continue with Microsoft Teams
                     </button>
 
                     <div className="border-t border-gray-300 pt-4 text-center text-sm text-slate-600">
