@@ -8,6 +8,7 @@ import {
   Archive,
   Settings,
   Shield,
+  MessageCircle,
 } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 
@@ -20,6 +21,7 @@ const navigationItems = [
   // { icon: BarChart3, label: "Analytics", href: "#" },
   // { icon: Archive, label: "Archive", href: "#" },
   // { icon: Shield, label: "Security", href: "#" },
+  { icon: MessageCircle, label: "Chat App", href: "chat" },
   { icon: Settings, label: "Settings", href: "settings" },
 ]
 
@@ -34,7 +36,7 @@ function Sidebar({ openSidebar }) {
 
   return (
     <aside className="w-full h-full overflow-auto bg-white border-r border-slate-200">
-      <div className={openSidebar ? 'p-6':'p-2'}>
+      <div className={openSidebar ? 'p-6' : 'p-2'}>
         {/* <p className="text-sm text-slate-600 mb-6">
           Harnessing AI for Seamless Research Management
         </p> */}
@@ -44,7 +46,7 @@ function Sidebar({ openSidebar }) {
             <div
               key={item.label}
               onClick={() => navigate(item.href)}
-              className={`flex items-center w-full h-11 ${openSidebar ? 'px-3':'justify-center'} cursor-pointer rounded-md transition ${currentPath() === item.href ? 'bg-slate-200 border-b-2 border-b-green-800' : 'hover:bg-slate-100'}`}
+              className={`flex items-center w-full h-11 ${openSidebar ? 'px-3' : 'justify-center'} cursor-pointer rounded-md transition ${currentPath() === item.href ? 'bg-slate-200 border-b-2 border-b-green-800' : 'hover:bg-slate-100'}`}
             >
               <item.icon className={`w-5 h-5 ${openSidebar && 'mr-3'} text-slate-700`} />
               {openSidebar && <span className="flex-1 text-[15px] text-left text-slate-800">{item.label}</span>}

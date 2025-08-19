@@ -23,7 +23,7 @@ function Dashboard() {
             if (response?.status === 200) {
                 dispatch(getProfileData(response?.data?.connected_accounts))
             } else {
-                navigate("/")
+                //navigate("/")
             }
 
         } catch (error) {

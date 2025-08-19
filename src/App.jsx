@@ -10,6 +10,7 @@ import TaskManagement from './pages/dashboard/taskmanagement'
 import AIDraftReview from './pages/dashboard/AIdraft'
 import Settings from './pages/dashboard/Settings'
 import CalendarManagement from './pages/dashboard/CalendarIntegration'
+import Chat from './pages/dashboard/Chat'
 
 function App() {
 
@@ -26,6 +27,7 @@ function App() {
           <Route path='ai-draft' element={<AIDraftReview />} />
           <Route path='settings' element={<Settings />} />
           <Route path='calendar-management' element={<CalendarManagement />} />
+          <Route path='chat' element={<Chat />} />
         </Route>
       </Routes>
     </div>
