@@ -30,9 +30,9 @@ export const authPasswordChange = async (payload) => {
     }
 };
 
-export const authMicroSoftDetails = async () => {
+export const authMicroSoftDetails = async (id) => {
     try {
-        const response = await axiosInstance.get("/microsoft/get/microsoft/accounts");
+        const response = await axiosInstance.get(`/microsoft/get/microsoft/accounts?mid=${id}`);
         return response;
     } catch (error) {
         console.error(error);

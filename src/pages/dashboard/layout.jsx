@@ -1,6 +1,6 @@
 import Navbar from '../../components/navbar'
 import Sidebar from '../../components/sidebar'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { ChevronsRightIcon } from 'lucide-react'
 import { authMicroSoftDetails } from '../../apis/auth'
@@ -11,19 +11,25 @@ import Loader from '../../components/loader'
 function Dashboard() {
     const [openSidebar, setOpenSidebar] = useState(true)
     const dispatch = useDispatch();
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const path = useLocation();
+    const searchParams = new URLSearchParams(path.search);
+    const query_msg = searchParams.get('response');
+    const user_id = searchParams.get('mid');
     const handleClose = () => {
         setOpenSidebar(!openSidebar)
     }
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(true);
+    const token = localStorage.getItem("token")
+    const mId = localStorage.getItem("userId")
 
-    const fetchMicrosoftDetails = async () => {
+    const fetchMicrosoftDetails = async (id) => {
         try {
-            const response = await authMicroSoftDetails();
+            const response = await authMicroSoftDetails(id);
             if (response?.status === 200) {
                 dispatch(getProfileData(response?.data?.connected_accounts))
             } else {
-                //navigate("/")
+                // navigate("/")
             }
 
         } catch (error) {
@@ -33,8 +39,18 @@ function Dashboard() {
         }
     }
     useEffect(() => {
-        fetchMicrosoftDetails()
-    }, [])
+        if (query_msg === "success" || token) {
+            if (user_id) {
+                localStorage.setItem("userId", user_id)
+                fetchMicrosoftDetails(user_id)
+            } else {
+                fetchMicrosoftDetails(mId)
+            }
+        } else {
+            //navigate("/")
+        }
+        fetchMicrosoftDetails(mId)
+    }, [query_msg, token])
 
     if (loading) return <Loader />
 

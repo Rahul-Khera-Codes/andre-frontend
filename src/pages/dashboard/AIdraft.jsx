@@ -16,6 +16,7 @@ import {
   FileText,
   Mail,
 } from "lucide-react"
+import { SelectDropdown } from "../../components/CustomDropDown"
 
 function AIDraftReview() {
   const mockDrafts = [
@@ -119,7 +120,7 @@ Dr. Smith`,
   ]
 
   const [drafts, setDrafts] = useState(mockDrafts)
-  const [selectedDraft, setSelectedDraft] = useState(drafts[0])
+  const [selectedDraft, setSelectedDraft] = useState({})
   const [editMode, setEditMode] = useState(false)
   const [editedContent, setEditedContent] = useState("")
   const [editedSubject, setEditedSubject] = useState("")
@@ -219,6 +220,10 @@ Dr. Smith`,
     })
   }
 
+  const catageriousOptions = [{ label: "All Categories", key: "all" }, { label: "Research", key: "research" }, { label: "Regulatory", key: "regulatory" },
+  { label: "Administrative", key: "administrative" }, { label: "Clinical", key: "clinical" }]
+  const statusOptions = [{ label: "All", key: "all" }, { label: "Draft", key: "draft" }, { label: "Reviewed", key: "reviewed" },
+  { label: "Approved", key: "approved" }, { label: "Sent", key: "sent" }]
   return (
     <div className="space-y-6 h-full w-full overflow-auto p-3">
       {/* Header */}
@@ -238,43 +243,41 @@ Dr. Smith`,
       </div>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex w-full gap-6">
         {/* Left Panel */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className={`space-y-4 ${selectedDraft?.status ? 'w-[35%]' : 'w-full'}`}>
           <div className="border border-slate-300 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold">Drafts</h2>
               <span className="bg-gray-100 px-2 py-0.5 rounded-full text-xs">{filteredDrafts.length}</span>
             </div>
             <input
-              className="border border-slate-300 w-full px-2 py-1 rounded mb-2 text-sm"
+              className="border focus:outline-none focus:ring-1 focus:ring-green-500 h-10 border-slate-300 w-full px-2 py-1 rounded mb-2 text-sm"
               placeholder="Search drafts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <div className="flex gap-2">
-              <select
+              <SelectDropdown
+                name="status"
+                options={statusOptions}
                 value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="border border-slate-300 px-2 py-1 rounded text-xs w-full"
-              >
-                <option value="all">All Status</option>
-                <option value="draft">Draft</option>
-                <option value="reviewed">Reviewed</option>
-                <option value="approved">Approved</option>
-                <option value="sent">Sent</option>
-              </select>
-              <select
+                onChange={(updated) => {
+                  setSelectedStatus(updated)
+                }}
+                placeholder="Select"
+                className="w-full"
+              />
+              <SelectDropdown
+                name="categories"
+                options={catageriousOptions}
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="border border-slate-300 px-2 py-1 rounded text-xs w-full"
-              >
-                <option value="all">All Categories</option>
-                <option value="research">Research</option>
-                <option value="regulatory">Regulatory</option>
-                <option value="administrative">Administrative</option>
-                <option value="clinical">Clinical</option>
-              </select>
+                onChange={(updated) => {
+                  setSelectedCategory(updated)
+                }}
+                placeholder="Select"
+                className="w-full"
+              />
             </div>
           </div>
 
@@ -283,9 +286,8 @@ Dr. Smith`,
             {filteredDrafts.map((draft) => (
               <div
                 key={draft.id}
-                className={`border border-slate-300 rounded-lg p-3 cursor-pointer hover:shadow-sm ${
-                  selectedDraft?.id === draft.id ? "ring-1 ring-green-800" : ""
-                }`}
+                className={`border border-slate-300 rounded-lg p-3 cursor-pointer hover:shadow-sm ${selectedDraft?.id === draft.id ? "border-b-2 bg-[#e8e1e176] border-b-green-800" : ""
+                  }`}
                 onClick={() => setSelectedDraft(draft)}
               >
                 <div className="flex items-start justify-between">
@@ -313,121 +315,121 @@ Dr. Smith`,
         </div>
 
         {/* Right Panel */}
-        <div className="lg:col-span-2">
-          {selectedDraft ? (
-            <div className="border border-slate-300 rounded-lg p-4">
-              {/* Status Row */}
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded flex items-center gap-1 ${getStatusColor(selectedDraft.status)}`}>
-                      {getStatusIcon(selectedDraft.status)}
-                      {selectedDraft.status}
-                    </span>
-                    <span className="border border-slate-300 px-2 py-0.5 rounded text-xs">v{selectedDraft.version}</span>
-                    <span className="border border-slate-300 px-2 py-0.5 rounded text-xs flex items-center gap-1">
-                      <Bot className="w-3 h-3" />
-                      {selectedDraft.aiModel}
-                    </span>
-                  </div>
-                  {editMode ? (
-                    <input
-                      value={editedSubject}
-                      onChange={(e) => setEditedSubject(e.target.value)}
-                      className="border border-slate-300 px-2 py-1 rounded w-full mt-2"
-                    />
-                  ) : (
-                    <h3 className="text-lg font-semibold mt-2">{selectedDraft.subject}</h3>
-                  )}
-                  <p className="text-sm text-slate-600">To: {selectedDraft.recipient}</p>
-                </div>
+        {(selectedDraft?.status) && <div className="w-[65%]">
+
+          <div className="border border-slate-300 rounded-lg p-4">
+            {/* Status Row */}
+            <div className="flex items-start justify-between">
+              <div>
                 <div className="flex items-center gap-2">
-                  {editMode ? (
-                    <>
-                      <button className="border border-slate-300 px-3 py-1 rounded text-sm" onClick={() => setEditMode(false)}>Cancel</button>
-                      <button className="bg-green-800 text-white px-3 py-1 rounded text-sm flex items-center" onClick={handleSaveEdit}>
-                        <Save className="w-4 h-4 mr-1" /> Save
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="border  border-slate-300 px-3 py-1 rounded text-sm flex items-center" onClick={handleEditStart}>
-                        <Edit3 className="w-4 h-4 mr-1" /> Edit
-                      </button>
-                      <button className="border border-slate-300 px-3 py-1 rounded text-sm">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                    </>
-                  )}
+                  <span className={`px-2 py-0.5 rounded flex items-center gap-1 ${getStatusColor(selectedDraft.status)}`}>
+                    {getStatusIcon(selectedDraft.status)}
+                    {selectedDraft.status}
+                  </span>
+                  <span className="border border-slate-300 px-2 py-0.5 rounded text-xs">v{selectedDraft.version}</span>
+                  <span className="border border-slate-300 px-2 py-0.5 rounded text-xs flex items-center gap-1">
+                    <Bot className="w-3 h-3" />
+                    {selectedDraft.aiModel}
+                  </span>
                 </div>
+                {editMode ? (
+                  <input
+                    value={editedSubject}
+                    onChange={(e) => setEditedSubject(e.target.value)}
+                    className="border border-slate-300 px-2 py-1 rounded w-full mt-2"
+                  />
+                ) : (
+                  <h3 className="text-lg font-semibold mt-2">{selectedDraft.subject}</h3>
+                )}
+                <p className="text-sm text-slate-600">To: {selectedDraft.recipient}</p>
               </div>
-
-              <hr className="my-4" style={{color:"lightgray"}}/>
-
-              {editMode ? (
-                <textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                  className="border border-slate-300 rounded w-full p-2 h-64"
-                />
-              ) : (
-                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{selectedDraft.content}</pre>
-              )}
-
-              <hr className="my-4" style={{color:"lightgrey"}} />
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-slate-700">Created:</span>
-                  <p className="text-slate-600">{formatDate(selectedDraft.createdAt)}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-slate-700">Last Modified:</span>
-                  <p className="text-slate-600">{formatDate(selectedDraft.lastModified)}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-slate-700">Template:</span>
-                  <p className="text-slate-600">{selectedDraft.template}</p>
-                </div>
-                <div>
-                  <span className="font-medium text-slate-700">AI Confidence:</span>
-                  <p className="text-slate-600">{selectedDraft.confidence}%</p>
-                </div>
+              <div className="flex items-center gap-2">
+                {editMode ? (
+                  <>
+                    <button className="border border-slate-300 px-3 py-1 rounded text-sm" onClick={() => setEditMode(false)}>Cancel</button>
+                    <button className="bg-green-800 text-white px-3 py-1 rounded text-sm flex items-center" onClick={handleSaveEdit}>
+                      <Save className="w-4 h-4 mr-1" /> Save
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="border  border-slate-300 px-3 py-1 rounded text-sm flex items-center" onClick={handleEditStart}>
+                      <Edit3 className="w-4 h-4 mr-1" /> Edit
+                    </button>
+                    <button className="border border-slate-300 px-3 py-1 rounded text-sm">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
               </div>
-
-              <div className="mt-4">
-                <span className="font-medium text-slate-700">Original Prompt:</span>
-                <p className="text-slate-600 text-sm mt-1 italic">{selectedDraft.originalPrompt}</p>
-              </div>
-
-              {!editMode && (
-                <div className="flex items-center gap-3 pt-4">
-                  <button
-                    className="bg-green-800 text-white px-3 py-2 rounded flex items-center"
-                    onClick={() => handleStatusChange(selectedDraft.id, "sent")}
-                  >
-                    <Send className="w-4 h-4 mr-2" /> Send Email
-                  </button>
-                  <button
-                    className="border border-slate-300 px-3 py-2 rounded flex items-center"
-                    onClick={() => handleStatusChange(selectedDraft.id, "approved")}
-                  >
-                    <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
-                  </button>
-                  <button className="border border-slate-300 px-3 py-2 rounded flex items-center">
-                    <Mail className="w-4 h-4 mr-2" /> Save to Drafts
-                  </button>
-                </div>
-              )}
             </div>
-          ) : (
-            <div className="border rounded-lg p-6 text-center">
-              <Bot className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Select a draft to review</h3>
-              <p className="text-slate-600">Choose a draft from the list to start reviewing and editing.</p>
+
+            <hr className="my-4" style={{ color: "lightgray" }} />
+
+            {editMode ? (
+              <textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="border border-slate-300 rounded w-full p-2 h-64"
+              />
+            ) : (
+              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{selectedDraft.content}</pre>
+            )}
+
+            <hr className="my-4" style={{ color: "lightgrey" }} />
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="font-medium text-slate-700">Created:</span>
+                <p className="text-slate-600">{formatDate(selectedDraft.createdAt)}</p>
+              </div>
+              <div>
+                <span className="font-medium text-slate-700">Last Modified:</span>
+                <p className="text-slate-600">{formatDate(selectedDraft.lastModified)}</p>
+              </div>
+              <div>
+                <span className="font-medium text-slate-700">Template:</span>
+                <p className="text-slate-600">{selectedDraft.template}</p>
+              </div>
+              <div>
+                <span className="font-medium text-slate-700">AI Confidence:</span>
+                <p className="text-slate-600">{selectedDraft.confidence}%</p>
+              </div>
             </div>
-          )}
+
+            <div className="mt-4">
+              <span className="font-medium text-slate-700">Original Prompt:</span>
+              <p className="text-slate-600 text-sm mt-1 italic">{selectedDraft.originalPrompt}</p>
+            </div>
+
+            {!editMode && (
+              <div className="flex items-center gap-3 pt-4">
+                <button
+                  className="bg-green-800 text-white px-3 py-2 rounded flex items-center"
+                  onClick={() => handleStatusChange(selectedDraft.id, "sent")}
+                >
+                  <Send className="w-4 h-4 mr-2" /> Send Email
+                </button>
+                <button
+                  className="border border-slate-300 px-3 py-2 rounded flex items-center"
+                  onClick={() => handleStatusChange(selectedDraft.id, "approved")}
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
+                </button>
+                <button className="border border-slate-300 px-3 py-2 rounded flex items-center">
+                  <Mail className="w-4 h-4 mr-2" /> Save to Drafts
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* <div className="border rounded-lg p-6 text-center">
+               <Bot className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+               <h3 className="text-lg font-semibold text-slate-900 mb-2">Select a draft to review</h3>
+               <p className="text-slate-600">Choose a draft from the list to start reviewing and editing.</p>
+             </div> */}
         </div>
+        }
       </div>
     </div>
   )

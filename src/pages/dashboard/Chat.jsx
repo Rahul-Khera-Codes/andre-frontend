@@ -4,7 +4,7 @@ import { ChatInterface } from "../../components/ChatInterface"
 function Chat() {
     return (
         <div className="flex flex-col h-full w-full p-3 overflow-auto">
-            <div className="border-b border-slate-200 p-4 flex gap-4 items-center">
+            <div className="border-b border-slate-200 flex gap-4 items-center">
                 <div className="text-emerald-700">
                     <Bot className="w-12 h-12" />
                 </div>

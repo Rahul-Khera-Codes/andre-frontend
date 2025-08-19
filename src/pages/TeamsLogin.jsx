@@ -6,11 +6,11 @@ import { useLocation, useNavigate } from "react-router-dom"
 const TeamsLogin = () => {
     const path = useLocation();
     const query = new URLSearchParams(path.search);
-    const query_msg = query.get('success');
+    const query_msg = query.get('response');
     const [error, setError] = useState("")
 
     useEffect(() => {
-        if (query_msg==="false") {
+        if (query_msg==="error") {
             setError("Logined Failed")
         }
     }, [query_msg])
