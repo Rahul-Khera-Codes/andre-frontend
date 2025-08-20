@@ -7,6 +7,7 @@ import { authMicroSoftDetails } from '../../apis/auth'
 import { useDispatch } from 'react-redux'
 import { getProfileData } from '../../store/profileSlice'
 import Loader from '../../components/loader'
+import { getLoginStatusMsg } from '../../store/loginStatusMsgSlice'
 
 function Dashboard() {
     const [openSidebar, setOpenSidebar] = useState(true)
@@ -16,41 +17,50 @@ function Dashboard() {
     const searchParams = new URLSearchParams(path.search);
     const query_msg = searchParams.get('response');
     const user_id = searchParams.get('mid');
+    const token = localStorage.getItem("token")
+    const mId = localStorage.getItem("mid")
+
+
+    const [loading, setLoading] = useState(true);
+
     const handleClose = () => {
         setOpenSidebar(!openSidebar)
     }
-    const [loading, setLoading] = useState(true);
-    const token = localStorage.getItem("token")
-    const mId = localStorage.getItem("userId")
-
     const fetchMicrosoftDetails = async (id) => {
+        console.log(id)
         try {
             const response = await authMicroSoftDetails(id);
+            console.log(response?.data, "kjhgfszdx")
             if (response?.status === 200) {
-                dispatch(getProfileData(response?.data?.connected_accounts))
+                localStorage.setItem("token", response?.data?.access_token)
+                localStorage.setItem("refreshToken", response?.data?.refresh_token)
+                localStorage.setItem("mid", response?.data?.microsoft_id)
+                dispatch(getProfileData(response?.data))
             } else {
-                // navigate("/")
+                dispatch(getLoginStatusMsg(response?.response?.data?.message))
+                navigate("/")
+                localStorage.clear()
             }
 
         } catch (error) {
+            dispatch(getLoginStatusMsg("Network Connection"))
             console.log(error)
         } finally {
             setLoading(false)
         }
     }
     useEffect(() => {
-        if (query_msg === "success" || token) {
+        if (user_id ?? mId) {
             if (user_id) {
-                localStorage.setItem("userId", user_id)
+                localStorage.setItem("mid", user_id)
                 fetchMicrosoftDetails(user_id)
             } else {
                 fetchMicrosoftDetails(mId)
             }
         } else {
-            //navigate("/")
+            navigate("/")
         }
-        fetchMicrosoftDetails(mId)
-    }, [query_msg, token])
+    }, [])
 
     if (loading) return <Loader />
 

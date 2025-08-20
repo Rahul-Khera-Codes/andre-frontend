@@ -2,12 +2,14 @@ import { useEffect, useState } from "react"
 import { Shield, AlertTriangle } from "lucide-react"
 import { BsMicrosoftTeams } from "react-icons/bs"
 import { useLocation, useNavigate } from "react-router-dom"
+import { useSelector } from "react-redux"
 
 const TeamsLogin = () => {
     const path = useLocation();
     const query = new URLSearchParams(path.search);
     const query_msg = query.get('response');
-    const [error, setError] = useState("")
+    const [error, setError] = useState("");
+    const msg=useSelector((state)=>state.loginStatusMsg.msg)
 
     useEffect(() => {
         if (query_msg==="error") {
@@ -41,11 +43,11 @@ const TeamsLogin = () => {
                     <div className="text-center">
                         <h2 className="text-xl font-semibold pb-2">Welcome Back</h2>
                     </div>
-                    {error && (
+                    {(error || msg) && (
                         <div className="flex items-start gap-2 p-3 bg-red-800 border border-red-200 rounded text-sm">
                             <AlertTriangle className="w-4 h-4 mt-0.5" color="white" />
                             <span className="text-white">
-                                {error}
+                                {error ?? msg}
                             </span>
                         </div>
                     )}

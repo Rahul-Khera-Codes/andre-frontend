@@ -23,7 +23,7 @@ function ProfileDropdown() {
 
   useEffect(() => {
     if (userDetails?.user) {
-      const details = userDetails?.user[0];
+      const details = userDetails?.user;
       setUser({
         name: details?.given_name?.[0].toUpperCase() + details?.given_name?.slice(1) + " " + details?.surname?.[0].toUpperCase() + details?.surname?.slice(1),
         email: details?.mail,

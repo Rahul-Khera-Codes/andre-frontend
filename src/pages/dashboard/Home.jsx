@@ -12,21 +12,14 @@ import Loader from "../../components/loader"
 import { useEffect, useState } from "react"
 
 function Home() {
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false)
-    }, 3000)
-  }, [])
 
   const userDetails = useSelector((state) => state.profile)
 
-  if (loading) return <Loader />
+  if (userDetails?.loading) return <Loader />
   return (
     <div className="space-y-6 h-full overflow-auto p-3">
       <div className="bg-gradient-to-r from-blue-100 to-green-100 rounded-lg p-6">
-        <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2">Welcome back, {userDetails?.user?.[0]?.given_name?.[0].toUpperCase() + userDetails?.user?.[0]?.given_name?.slice(1) || "Test"}</h2>
+        <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2">Welcome back, {userDetails?.user?.given_name?.[0].toUpperCase() + userDetails?.user?.given_name?.slice(1) || "Test"}</h2>
         <p className="text-slate-600">You have 12 pending email automations and 8 active tasks requiring attention.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

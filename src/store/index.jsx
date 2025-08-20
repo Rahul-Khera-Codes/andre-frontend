@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import profileReducer from "./profileSlice"
+import loginStatusMsgReducer from "./loginStatusMsgSlice"
 
 const store = configureStore({
   reducer: {
-    profile: profileReducer
+    profile: profileReducer,
+    loginStatusMsg: loginStatusMsgReducer
   },
 });
 

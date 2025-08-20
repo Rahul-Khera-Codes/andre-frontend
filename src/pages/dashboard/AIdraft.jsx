@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Bot,
   Send,
@@ -17,6 +17,8 @@ import {
   Mail,
 } from "lucide-react"
 import { SelectDropdown } from "../../components/CustomDropDown"
+import { getAutomateEmails } from "../../apis/emailAutomation"
+import Loader from "../../components/loader"
 
 function AIDraftReview() {
   const mockDrafts = [
@@ -119,23 +121,72 @@ Dr. Smith`,
     },
   ]
 
-  const [drafts, setDrafts] = useState(mockDrafts)
+  const [drafts, setDrafts] = useState([])
   const [selectedDraft, setSelectedDraft] = useState({})
   const [editMode, setEditMode] = useState(false)
   const [editedContent, setEditedContent] = useState("")
   const [editedSubject, setEditedSubject] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [loading, setLoading] = useState(true)
 
-  const filteredDrafts = drafts.filter((draft) => {
-    const matchesSearch =
-      draft.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      draft.recipient.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = selectedStatus === "all" || draft.status === selectedStatus
-    const matchesCategory = selectedCategory === "all" || draft.category === selectedCategory
-    return matchesSearch && matchesStatus && matchesCategory
-  })
+  const [filteredDrafts, setFilteredDrafts] = useState([])
+
+  function filteredData() {
+    const data = drafts.filter((draft) => {
+      const matchesSearch =
+        draft.subject?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+        draft.recipient?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+      const matchesStatus = draft.status === selectedStatus
+      const matchesCategory = draft.category === selectedCategory
+      return matchesSearch || matchesStatus || matchesCategory
+    })
+    setFilteredDrafts(data)
+  }
+
+
+  useEffect(() => {
+    filteredData()
+  }, [drafts, searchQuery])
+
+  useEffect(() => {
+    fetchEmails()
+  }, [selectedStatus])
+
+  const fetchEmails = async () => {
+    setLoading(true)
+    try {
+      const response = await getAutomateEmails(selectedStatus)
+      const mails = response?.data?.mails;
+      if (mails?.length > 0) {
+        const updatedFormat = mails.map((e) => ({
+          ...e,
+          recipient: e.toRecipients[0]?.emailAddress.address,
+          content: htmlToPlainText(e.body.content),
+          status: e.isDraft ? 'draft' : 'approved',
+          priority: e.importance,
+          category: e.categories ?? "research",
+          createdAt: e.createdDateTime,
+          lastModified: e.lastModifiedDateTime,
+          aiModel: "GPT-4",
+          confidence: 95,
+          originalPrompt: "Create research summary email with Q4 data analysis results",
+          version: 1,
+          template: "Research Update",
+        }));
+        setDrafts(updatedFormat)
+        filteredData(updatedFormat)
+      } else {
+        setDrafts([])
+        filteredData()
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleEditStart = () => {
     if (selectedDraft) {
@@ -211,6 +262,28 @@ Dr. Smith`,
     }
   }
 
+  const htmlToPlainText = (html) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+
+    const elementsToRemove = tempDiv.querySelectorAll("style, script");
+    elementsToRemove.forEach(el => el.remove());
+
+    tempDiv.querySelectorAll("br, li").forEach(el => {
+      el.replaceWith("\n" + el.textContent);
+    });
+
+    tempDiv.querySelectorAll("p").forEach(el => {
+      el.replaceWith(el.textContent + "\n");
+    });
+
+    return tempDiv.textContent
+      .replace(/\n\s*\n/g, "\n")
+      .trim();
+  };
+
+
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -219,11 +292,9 @@ Dr. Smith`,
       minute: "2-digit",
     })
   }
-
   const catageriousOptions = [{ label: "All Categories", key: "all" }, { label: "Research", key: "research" }, { label: "Regulatory", key: "regulatory" },
   { label: "Administrative", key: "administrative" }, { label: "Clinical", key: "clinical" }]
-  const statusOptions = [{ label: "All", key: "all" }, { label: "Draft", key: "draft" }, { label: "Reviewed", key: "reviewed" },
-  { label: "Approved", key: "approved" }, { label: "Sent", key: "sent" }]
+  const statusOptions = [{ label: "All", key: "all" }, { label: "Sentitems", key: "sentitems" }, { label: "Draft", key: "draft" }, { label: "Inbox", key: "inbox" },]
   return (
     <div className="space-y-6 h-full w-full overflow-auto p-3">
       {/* Header */}
@@ -243,7 +314,7 @@ Dr. Smith`,
       </div>
 
       {/* Main Grid */}
-      <div className="flex w-full gap-6">
+      <div className="flex w-full h-full gap-6">
         {/* Left Panel */}
         <div className={`space-y-4 ${selectedDraft?.status ? 'w-[35%]' : 'w-full'}`}>
           <div className="border border-slate-300 rounded-lg p-4">
@@ -267,6 +338,7 @@ Dr. Smith`,
                 }}
                 placeholder="Select"
                 className="w-full"
+                extraName="Status"
               />
               <SelectDropdown
                 name="categories"
@@ -283,12 +355,15 @@ Dr. Smith`,
 
           {/* Drafts List */}
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {filteredDrafts.map((draft) => (
+            {loading ? <div className="h-56 w-full"><Loader /></div> : filteredDrafts?.length > 0 ? filteredDrafts.map((draft) => (
               <div
                 key={draft.id}
                 className={`border border-slate-300 rounded-lg p-3 cursor-pointer hover:shadow-sm ${selectedDraft?.id === draft.id ? "border-b-2 bg-[#e8e1e176] border-b-green-800" : ""
                   }`}
-                onClick={() => setSelectedDraft(draft)}
+                onClick={() => {
+                  setSelectedDraft(draft)
+                  setEditMode(false)
+                }}
               >
                 <div className="flex items-start justify-between">
                   <h4 className="font-medium text-sm leading-tight line-clamp-2">{draft.subject}</h4>
@@ -310,12 +385,15 @@ Dr. Smith`,
                   </span>
                 </div>
               </div>
-            ))}
+            )) : <div className="border border-slate-300 rounded-lg p-6 text-center">
+              <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">No Mails Found</h3>
+            </div>}
           </div>
         </div>
 
         {/* Right Panel */}
-        {(selectedDraft?.status) && <div className="w-[65%]">
+        {(selectedDraft?.status) && <div className="w-[65%] h-full overflow-auto">
 
           <div className="border border-slate-300 rounded-lg p-4">
             {/* Status Row */}
@@ -370,11 +448,16 @@ Dr. Smith`,
               <textarea
                 value={editedContent}
                 onChange={(e) => setEditedContent(e.target.value)}
-                className="border border-slate-300 rounded w-full p-2 h-64"
+                className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-green-500"
               />
             ) : (
-              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{selectedDraft.content}</pre>
+              <textarea
+                value={selectedDraft.content}
+                readOnly
+                className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-green-500"
+              />
             )}
+
 
             <hr className="my-4" style={{ color: "lightgrey" }} />
 
