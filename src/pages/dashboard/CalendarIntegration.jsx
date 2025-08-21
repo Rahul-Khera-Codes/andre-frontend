@@ -16,6 +16,8 @@ import {
     Zap,
 } from "lucide-react"
 import { format } from "date-fns"
+import { SelectDropdown } from "../../components/CustomDropDown"
+import CustomDatePicker from "../../components/CustomCalendar"
 
 const mockReminders = [
     {
@@ -306,11 +308,11 @@ function CalendarManagement() {
                     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
                         <div className="bg-white rounded-2xl shadow-xl w-full max-h-[90vh] overflow-auto max-w-2xl p-6 space-y-6">
                             <div className="text-xl font-semibold">Create New Reminder</div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium">Title</label>
                                     <input
-                                        className="w-full rounded-md border border-gray-300 px-3 py-2"
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500"
                                         value={newReminder.title}
                                         onChange={(e) =>
                                             setNewReminder((prev) => ({ ...prev, title: e.target.value }))
@@ -318,19 +320,17 @@ function CalendarManagement() {
                                         placeholder="Reminder title..."
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-medium">Due Date</label>
-                                    <button className="flex items-center w-full px-3 py-2 border border-gray-300 rounded-md text-left">
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {format(newReminder.dueDate, "PPP")}
-                                    </button>
-                                </div>
+                                        <div className="space-y-2 pt-1">
+                                            <CustomDatePicker value={newReminder.dueDate} onChange={(updated) => {
+                                                setNewReminder((prev) => ({ ...prev, dueDate: updated }))
+                                            }} />
+                                        </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium">Description</label>
                                 <textarea
                                     rows={3}
-                                    className="w-full rounded-md border border-gray-300 px-3 py-2"
+                                    className="w-full rounded-md border focus:outline-none resize-none focus:ring-1 focus:ring-green-500 border-gray-300 px-3 py-2"
                                     value={newReminder.description}
                                     onChange={(e) =>
                                         setNewReminder((prev) => ({ ...prev, description: e.target.value }))
@@ -338,35 +338,32 @@ function CalendarManagement() {
                                     placeholder="Detailed description of the reminder..."
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium">Priority</label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                    <SelectDropdown
+                                        name="priority"
+                                        options={[{ label: "High", key: "high" }, { label: "Medium", key: "medium" }, { label: "Low", key: "low" }]}
                                         value={newReminder.priority}
-                                        onChange={(e) =>
-                                            setNewReminder((prev) => ({ ...prev, priority: e.target.value }))
-                                        }
-                                    >
-                                        <option value="high">High Priority</option>
-                                        <option value="medium">Medium Priority</option>
-                                        <option value="low">Low Priority</option>
-                                    </select>
+                                        onChange={(updated) => {
+                                            setNewReminder((prev) => ({ ...prev, priority: updated }))
+                                        }}
+                                        placeholder="Select"
+                                        className="w-full"
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium">Category</label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                    <SelectDropdown
+                                        name="category"
+                                        options={[{ label: "Research", key: "research" }, { label: "Regulatory", key: "regulatory" }, { label: "Administrative", key: "administrative" }, { label: "Clinical", key: "clinical" }]}
                                         value={newReminder.category}
-                                        onChange={(e) =>
-                                            setNewReminder((prev) => ({ ...prev, category: e.target.value }))
-                                        }
-                                    >
-                                        <option value="research">Research</option>
-                                        <option value="regulatory">Regulatory</option>
-                                        <option value="administrative">Administrative</option>
-                                        <option value="clinical">Clinical</option>
-                                    </select>
+                                        onChange={(updated) => {
+                                            setNewReminder((prev) => ({ ...prev, category: updated }))
+                                        }}
+                                        placeholder="Select"
+                                        className="w-full"
+                                    />
                                 </div>
                             </div>
                             <div className="space-y-3">
@@ -378,12 +375,13 @@ function CalendarManagement() {
                                         { key: "teams", label: "Teams", icon: Users },
                                         { key: "slack", label: "Slack", icon: MessageSquare },
                                     ].map(({ key, label, icon: Icon }) => (
-                                        <label key={key} className="flex items-center space-x-2 cursor-pointer">
+                                        <label key={key} className="flex w-fit items-center space-x-2 cursor-pointer">
                                             <input
                                                 type="checkbox"
                                                 checked={newReminder.deliveryMethods.includes(key)}
                                                 onChange={() => toggleDeliveryMethod(key)}
                                                 className="w-4 h-4 accent-green-700"
+                                                style={{borderRadius:"20px"}}
                                             />
                                             <Icon className="w-4 h-4" />
                                             <span>{label}</span>
@@ -402,18 +400,16 @@ function CalendarManagement() {
                                 />
                                 <span>Recurring reminder</span>
                                 {newReminder.recurring && (
-                                    <select
-                                        className="ml-4 border border-gray-300 rounded-md px-3 py-2"
+                                    <SelectDropdown
+                                        name="recurring"
+                                        options={[{ label: "Daily", key: "daily" }, { label: "Weekly", key: "weekly" }, { label: "Monthly", key: "monthly" }, { label: "Yearly", key: "yearly" }]}
                                         value={newReminder.recurringPattern}
-                                        onChange={(e) =>
-                                            setNewReminder((prev) => ({ ...prev, recurringPattern: e.target.value }))
-                                        }
-                                    >
-                                        <option value="daily">Daily</option>
-                                        <option value="weekly">Weekly</option>
-                                        <option value="monthly">Monthly</option>
-                                        <option value="yearly">Yearly</option>
-                                    </select>
+                                        onChange={(updated) => {
+                                            setNewReminder((prev) => ({ ...prev, recurringPattern: updated }))
+                                        }}
+                                        placeholder="Select"
+                                        className="w-[110px]"
+                                    />
                                 )}
                             </div>
                             <div className="flex justify-end gap-3">

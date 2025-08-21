@@ -108,7 +108,7 @@ export function ChatInterface() {
 
                 {isLoading && (
                     <div className="flex gap-3 justify-start">
-                        <div className="w-8 h-8 bg-emerald-100 flex-shrink-0">
+                        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex justify-center items-center">
                             <div className="text-emerald-700">
                                 <Bot className="w-4 h-4" />
                             </div>

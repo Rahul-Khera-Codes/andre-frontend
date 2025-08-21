@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import {
   Mail,
   Search,
@@ -12,6 +12,7 @@ import {
   Star,
   Reply,
 } from "lucide-react"
+import { SelectDropdown } from "../../components/CustomDropDown"
 
 const mockTasks = [
   {
@@ -169,6 +170,15 @@ function TaskManagement() {
     return date.toLocaleDateString()
   }
 
+  const priorityOptions = [{ label: "All", key: "all" }, { label: "High", key: "high" }, { label: "Medium", key: "medium" }, { label: "Low", key: "low" }]
+  const CategoriesOptions = [{ label: "All", key: "all" }, { label: "Research", key: "research" }, { label: "Regulatory", key: "regulatory" }, { label: "Administrative", key: "administrative" }, { label: "Clinical", key: "clinical" }]
+  const StatusOptions = [{ label: "All", key: "all" }, { label: "Pending", key: "pending" }, { label: "In Progress", key: "in_progress" }, { label: "Completed", key: "completed" }]
+
+  const dropDownList = [{ options: priorityOptions, name: "priority", value: selectedPriority, updateValue: setSelectedPriority, extraName: "Priority" },
+  { options: CategoriesOptions, name: "Categories", value: selectedCategory, updateValue: setSelectedCategory, extraName: "Categories" },
+  { options: StatusOptions, name: "Status", value: selectedStatus, updateValue: setSelectedStatus, extraName: "Status" }
+  ]
+
   return (
     <div className="space-y-6 p-3 h-full w-full overflow-auto">
       <div className="flex items-center justify-between">
@@ -197,37 +207,21 @@ function TaskManagement() {
             />
           </div>
           <div className="flex gap-3">
-            <select
-              value={selectedPriority}
-              onChange={(e) => setSelectedPriority(e.target.value)}
-              className="border border-slate-300 rounded px-2 py-1 text-sm"
-            >
-              <option value="all">All Priority</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="border border-slate-300 rounded px-2 py-1 text-sm"
-            >
-              <option value="all">All Categories</option>
-              <option value="research">Research</option>
-              <option value="regulatory">Regulatory</option>
-              <option value="administrative">Administrative</option>
-              <option value="clinical">Clinical</option>
-            </select>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="border border-slate-300 rounded px-2 py-1 text-sm"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
+            {dropDownList.map((e) => (
+              <React.Fragment key={e.name}>
+                <SelectDropdown
+                  name={e.name}
+                  options={e.options}
+                  value={e.value}
+                  onChange={(updated) => {
+                    e.updateValue(updated)
+                  }}
+                  placeholder="Select"
+                  className="w-full"
+                  extraName={e.extraName}
+                />
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </div>
