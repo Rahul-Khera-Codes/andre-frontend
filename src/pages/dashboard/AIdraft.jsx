@@ -183,7 +183,7 @@ Dr. Smith`,
       } else {
         setDrafts([])
         filteredData()
-        setMessage(response?.message??"No Mails Found")
+        setMessage(response?.response?.data?.error ?? response?.message ?? "No Mails Found")
       }
     } catch (error) {
       console.log(error)

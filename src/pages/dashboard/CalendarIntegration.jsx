@@ -166,6 +166,8 @@ function CalendarManagement() {
         )
     }
 
+    const buttonsList = [{ label: "Complete", icon: CheckCircle2, key: "completed" }, { label: "Snooze", icon: Clock, key: "snoozed" }, { label: "Edit", icon: Edit3, key: "edit" }, { label: "Trigger", icon: Zap, key: "trigger" }, { label: "Delete", icon: Trash2, key: "delete" }]
+
     const priorityOptions = [{ label: "All", key: "all" }, { label: "High", key: "high" }, { label: "Medium", key: "medium" }, { label: "Low", key: "low" }]
     const CategoriesOptions = [{ label: "All", key: "all" }, { label: "Research", key: "research" }, { label: "Regulatory", key: "regulatory" }, { label: "Administrative", key: "administrative" }, { label: "Clinical", key: "clinical" }]
 
@@ -272,27 +274,14 @@ function CalendarManagement() {
                                 </p>
                             </div>
                             <div className="flex flex-col gap-2">
-                                <button
-                                    onClick={() => handleStatusChange(reminder.id, "completed")}
-                                    className="px-3 text-left flex items-center py-1 text-sm border border-gray-300 rounded hover:bg-slate-100"
-                                >
-                                    <CheckCircle2 className="w-4 h-4 inline mr-1" /> Complete
-                                </button>
-                                <button
-                                    onClick={() => handleStatusChange(reminder.id, "snoozed")}
-                                    className="px-3 py-1 text-left text-sm border border-gray-300 rounded hover:bg-slate-100"
-                                >
-                                    <Clock className="w-4 h-4 inline mr-1" /> Snooze
-                                </button>
-                                <button className="px-3 text-left py-1 text-sm border border-gray-300 rounded hover:bg-slate-100">
-                                    <Edit3 className="w-4 h-4 inline mr-1" /> Edit
-                                </button>
-                                <button className="px-3 text-left py-1 text-sm border border-gray-300 rounded hover:bg-slate-100">
-                                    <Zap className="w-4 h-4 inline mr-1" /> Trigger
-                                </button>
-                                <button className="px-3 text-left py-1 text-sm border border-red-300 rounded text-red-600 hover:bg-red-50">
-                                    <Trash2 className="w-4 h-4 inline mr-1" /> Delete
-                                </button>
+                                {buttonsList.map((e) => {
+                                    const Icon = e.icon;
+                                    return (
+                                        <button key={e.key} onClick={() => handleStatusChange(reminder.id, `${e.key}`)} className={`px-3 text-left flex items-center py-1 text-sm border rounded ${e.key === "delete" ? 'border-red-300 text-red-600 hover:bg-red-50' : 'border-gray-300 hover:bg-slate-100'}`}>
+                                            <Icon className="w-4 h-4 inline mr-1" /> {e.label}
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
                     </div>
