@@ -19,6 +19,7 @@ import {
 import { SelectDropdown } from "../../components/CustomDropDown"
 import { getAutomateEmails } from "../../apis/emailAutomation"
 import Loader from "../../components/loader"
+import { IoClose } from "react-icons/io5"
 
 function AIDraftReview() {
   const mockDrafts = [
@@ -393,7 +394,7 @@ Dr. Smith`,
         </div>
 
         {/* Right Panel */}
-        {(selectedDraft?.status) && <div className="w-[65%] h-full overflow-auto">
+        {(selectedDraft?.status) && <div className="w-[65%] h-full">
 
           <div className="border border-slate-300 rounded-lg p-4">
             {/* Status Row */}
@@ -434,8 +435,8 @@ Dr. Smith`,
                     <button className="border  border-slate-300 px-3 py-1 rounded text-sm flex items-center" onClick={handleEditStart}>
                       <Edit3 className="w-4 h-4 mr-1" /> Edit
                     </button>
-                    <button className="border border-slate-300 px-3 py-1 rounded text-sm">
-                      <MoreHorizontal className="w-4 h-4" />
+                    <button onClick={() => setSelectedDraft({})} className="border cursor-pointer border-slate-300 px-3 py-1 rounded text-sm">
+                      <IoClose className="w-4 h-4" />
                     </button>
                   </>
                 )}
