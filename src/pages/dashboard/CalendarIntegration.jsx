@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import {
     Bell,
     Calendar as CalendarIcon,
@@ -166,6 +166,13 @@ function CalendarManagement() {
         )
     }
 
+    const priorityOptions = [{ label: "All", key: "all" }, { label: "High", key: "high" }, { label: "Medium", key: "medium" }, { label: "Low", key: "low" }]
+    const CategoriesOptions = [{ label: "All", key: "all" }, { label: "Research", key: "research" }, { label: "Regulatory", key: "regulatory" }, { label: "Administrative", key: "administrative" }, { label: "Clinical", key: "clinical" }]
+
+    const dropDownList = [{ options: priorityOptions, name: "priority", value: selectedPriority, updateValue: setSelectedPriority, extraName: "Priority" },
+    { options: CategoriesOptions, name: "Categories", value: selectedCategory, updateValue: setSelectedCategory, extraName: "Categories" },
+    ]
+
     return (
         <div className="space-y-6 h-full w-full p-3 overflow-auto">
             <div className="flex items-center justify-between">
@@ -209,32 +216,26 @@ function CalendarManagement() {
             </div>
             <div className="p-4 border border-gray-300 rounded-lg flex gap-3">
                 <input
-                    className="flex-1 border border-gray-300 px-3 py-2 rounded-lg"
+                    className="flex-1 focus:ring-green-700 focus:outline-none focus:ring-1 border border-gray-300 px-3 py-2 rounded-lg"
                     placeholder="Search reminders..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="border border-gray-300 px-3 py-2 rounded-lg"
-                >
-                    <option value="all">All Categories</option>
-                    <option value="research">Research</option>
-                    <option value="regulatory">Regulatory</option>
-                    <option value="administrative">Administrative</option>
-                    <option value="clinical">Clinical</option>
-                </select>
-                <select
-                    value={selectedPriority}
-                    onChange={(e) => setSelectedPriority(e.target.value)}
-                    className="border border-gray-300 px-3 py-2 rounded-lg"
-                >
-                    <option value="all">All Priority</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                </select>
+                {dropDownList.map((e) => (
+                    <React.Fragment key={e.name}>
+                        <SelectDropdown
+                            name={e.name}
+                            options={e.options}
+                            value={e.value}
+                            onChange={(updated) => {
+                                e.updateValue(updated)
+                            }}
+                            placeholder="Select"
+                            className="w-[167px]"
+                            extraName={e.extraName}
+                        />
+                    </React.Fragment>
+                ))}
             </div>
             <div className="space-y-4">
                 {filteredReminders.map((reminder) => (
@@ -273,23 +274,23 @@ function CalendarManagement() {
                             <div className="flex flex-col gap-2">
                                 <button
                                     onClick={() => handleStatusChange(reminder.id, "completed")}
-                                    className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-slate-100"
+                                    className="px-3 text-left flex items-center py-1 text-sm border border-gray-300 rounded hover:bg-slate-100"
                                 >
                                     <CheckCircle2 className="w-4 h-4 inline mr-1" /> Complete
                                 </button>
                                 <button
                                     onClick={() => handleStatusChange(reminder.id, "snoozed")}
-                                    className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-slate-100"
+                                    className="px-3 py-1 text-left text-sm border border-gray-300 rounded hover:bg-slate-100"
                                 >
                                     <Clock className="w-4 h-4 inline mr-1" /> Snooze
                                 </button>
-                                <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-slate-100">
+                                <button className="px-3 text-left py-1 text-sm border border-gray-300 rounded hover:bg-slate-100">
                                     <Edit3 className="w-4 h-4 inline mr-1" /> Edit
                                 </button>
-                                <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-slate-100">
+                                <button className="px-3 text-left py-1 text-sm border border-gray-300 rounded hover:bg-slate-100">
                                     <Zap className="w-4 h-4 inline mr-1" /> Trigger
                                 </button>
-                                <button className="px-3 py-1 text-sm border border-red-300 rounded text-red-600 hover:bg-red-50">
+                                <button className="px-3 text-left py-1 text-sm border border-red-300 rounded text-red-600 hover:bg-red-50">
                                     <Trash2 className="w-4 h-4 inline mr-1" /> Delete
                                 </button>
                             </div>
@@ -320,11 +321,11 @@ function CalendarManagement() {
                                         placeholder="Reminder title..."
                                     />
                                 </div>
-                                        <div className="space-y-2 pt-1">
-                                            <CustomDatePicker value={newReminder.dueDate} onChange={(updated) => {
-                                                setNewReminder((prev) => ({ ...prev, dueDate: updated }))
-                                            }} />
-                                        </div>
+                                <div className="space-y-2 pt-1">
+                                    <CustomDatePicker value={newReminder.dueDate} onChange={(updated) => {
+                                        setNewReminder((prev) => ({ ...prev, dueDate: updated }))
+                                    }} />
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium">Description</label>
@@ -381,7 +382,7 @@ function CalendarManagement() {
                                                 checked={newReminder.deliveryMethods.includes(key)}
                                                 onChange={() => toggleDeliveryMethod(key)}
                                                 className="w-4 h-4 accent-green-700"
-                                                style={{borderRadius:"20px"}}
+                                                style={{ borderRadius: "20px" }}
                                             />
                                             <Icon className="w-4 h-4" />
                                             <span>{label}</span>

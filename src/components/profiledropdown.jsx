@@ -27,7 +27,7 @@ function ProfileDropdown() {
       setUser({
         name: details?.given_name?.[0].toUpperCase() + details?.given_name?.slice(1) + " " + details?.surname?.[0].toUpperCase() + details?.surname?.slice(1),
         email: details?.mail,
-        avatar: "/placeholder.svg",
+        avatar: "https://picsum.photos/seed/picsum/200/300",
       })
     }
 

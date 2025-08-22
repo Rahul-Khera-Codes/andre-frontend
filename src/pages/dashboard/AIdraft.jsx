@@ -130,7 +130,8 @@ Dr. Smith`,
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("")
 
   const [filteredDrafts, setFilteredDrafts] = useState([])
 
@@ -157,6 +158,7 @@ Dr. Smith`,
 
   const fetchEmails = async () => {
     setLoading(true)
+    setMessage("")
     try {
       const response = await getAutomateEmails(selectedStatus)
       const mails = response?.data?.mails;
@@ -181,9 +183,11 @@ Dr. Smith`,
       } else {
         setDrafts([])
         filteredData()
+        setMessage(response?.message??"No Mails Found")
       }
     } catch (error) {
       console.log(error)
+      setMessage("Network Connection Error")
     } finally {
       setLoading(false)
     }
@@ -293,7 +297,7 @@ Dr. Smith`,
       minute: "2-digit",
     })
   }
-  const catageriousOptions = [{ label: "All Categories", key: "all" }, { label: "Research", key: "research" }, { label: "Regulatory", key: "regulatory" },
+  const catageriousOptions = [{ label: "All", key: "all" }, { label: "Research", key: "research" }, { label: "Regulatory", key: "regulatory" },
   { label: "Administrative", key: "administrative" }, { label: "Clinical", key: "clinical" }]
   const statusOptions = [{ label: "All", key: "all" }, { label: "Sentitems", key: "sentitems" }, { label: "Draft", key: "draft" }, { label: "Inbox", key: "inbox" },]
   return (
@@ -329,7 +333,7 @@ Dr. Smith`,
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <div className="flex gap-2">
+            <div className="flex md:flex-row flex-col gap-2">
               <SelectDropdown
                 name="status"
                 options={statusOptions}
@@ -350,13 +354,14 @@ Dr. Smith`,
                 }}
                 placeholder="Select"
                 className="w-full"
+                extraName="Categories"
               />
             </div>
           </div>
 
           {/* Drafts List */}
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {loading ? <div className="h-56 w-full"><Loader /></div> : filteredDrafts?.length > 0 ? filteredDrafts.map((draft) => (
+            {loading ? <div className="h-56 w-full"><Loader /></div> : !message ? filteredDrafts.map((draft) => (
               <div
                 key={draft.id}
                 className={`border border-slate-300 rounded-lg p-3 cursor-pointer hover:shadow-sm ${selectedDraft?.id === draft.id ? "border-b-2 bg-[#e8e1e176] border-b-green-800" : ""
@@ -388,7 +393,7 @@ Dr. Smith`,
               </div>
             )) : <div className="border border-slate-300 rounded-lg p-6 text-center">
               <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">No Mails Found</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">{message}</h3>
             </div>}
           </div>
         </div>
