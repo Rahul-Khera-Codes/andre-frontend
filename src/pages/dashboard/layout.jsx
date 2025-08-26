@@ -66,8 +66,8 @@ function Dashboard() {
 
     return (
         <div className='h-full w-full'>
-            <div className='h-20 w-full'><Navbar /></div>
-            <div className='h-[calc(100%-80px)] w-full flex'>
+            <div className='h-18 w-full'><Navbar /></div>
+            <div className='h-[calc(100%-72px)] w-full flex'>
                 <div className={`${openSidebar ? 'w-74' : 'w-20'} relative h-full flex`}><Sidebar openSidebar={openSidebar} />
                     <div className={`absolute right-[-18px] group cursor-pointer transition-transform duration-200 ${openSidebar ? "rotate-180" : "rotate-0"
                         }`} onClick={handleClose}><div className="flex items-center gap-2"><div className='group-hover:hidden'><ChevronsRightIcon color='lightgray' /></div> <div className='hidden group-hover:block'> <ChevronsRightIcon /></div></div></div>

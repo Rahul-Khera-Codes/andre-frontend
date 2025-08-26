@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
     Bell,
     Calendar as CalendarIcon,
@@ -18,6 +18,8 @@ import {
 import { format } from "date-fns"
 import { SelectDropdown } from "../../components/CustomDropDown"
 import CustomDatePicker from "../../components/CustomCalendar"
+import { getCalandarEvents } from "../../apis/calendarIntegration"
+import Loader from "../../components/loader"
 
 const mockReminders = [
     {
@@ -65,6 +67,11 @@ function CalendarManagement() {
     const [selectedCategory, setSelectedCategory] = useState("all")
     const [selectedPriority, setSelectedPriority] = useState("all")
     const [isOpen, setIsOpen] = useState(false)
+    const [loading, setLoading] = useState(true);
+    const [message, setMessage] = useState("")
+    const [calendarEvents, setCalendarEvents] = useState([])
+
+    const [filteredDrafts, setFilteredDrafts] = useState([])
     const [newReminder, setNewReminder] = useState({
         title: "",
         dueDate: new Date(),
@@ -99,6 +106,44 @@ function CalendarManagement() {
         const matchesPriority = selectedPriority === "all" || reminder.priority === selectedPriority
         return matchesTab && matchesSearch && matchesCategory && matchesPriority
     })
+
+    function filteredData() {
+        const data = calendarEvents.filter((draft) => {
+            const matchesSearch =
+                draft.body_preview?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+                draft.to_recipient_emails?.[0]?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+            return matchesSearch
+        })
+        setFilteredDrafts(data)
+    }
+
+
+    const fetchCalendarEvents = async () => {
+        setLoading(true)
+        try {
+            const response = await getCalandarEvents()
+            const mails = response?.data;
+            console.log(mails)
+            if (mails?.length > 0) {
+                setCalendarEvents(mails)
+                setFilteredDrafts(mails)
+                //filteredData(mails)
+            } else {
+                setCalendarEvents([])
+                // filteredData()
+                setMessage(response?.response?.data?.error ?? response?.message ?? "No Mails Found")
+            }
+
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchCalendarEvents()
+    }, [])
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -164,6 +209,15 @@ function CalendarManagement() {
         setReminders((prev) =>
             prev.map((reminder) => (reminder.id === reminderId ? { ...reminder, status: newStatus } : reminder)),
         )
+    }
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        })
     }
 
     const buttonsList = [{ label: "Complete", icon: CheckCircle2, key: "completed" }, { label: "Snooze", icon: Clock, key: "snoozed" }, { label: "Edit", icon: Edit3, key: "edit" }, { label: "Trigger", icon: Zap, key: "trigger" }, { label: "Delete", icon: Trash2, key: "delete" }]
@@ -240,6 +294,57 @@ function CalendarManagement() {
                 ))}
             </div>
             <div className="space-y-4">
+                <div className="space-y-4  scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-1">
+                    {loading ? (
+                        <div className="h-56 w-full flex justify-center items-center">
+                            <Loader />
+                        </div>
+                    ) : !message ? (
+                        filteredDrafts.map((draft) => (
+                            <div
+                                key={draft.event_id}
+                                className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                                onClick={() => {
+                                    setCalendarEvents(draft);
+                                    setEditMode(false);
+                                }}
+                            >
+                                <div className="flex justify-between items-start mb-2">
+                                    <h4 className="text-base font-semibold text-slate-800 line-clamp-2">
+                                        📄 {draft.subject || 'No Subject'}
+                                    </h4>
+                                    <AlertTriangle
+                                        className={`w-4 h-4 mt-1 ${getPriorityColor(draft.body.content)}`}
+                                    />
+                                </div>
+
+                                <p className="text-sm text-slate-600 line-clamp-2 mb-3">
+                                    ✏️ {draft.body.content || 'No content provided'}
+                                </p>
+
+                                <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 space-y-1">
+                                    <p className="text-sm text-slate-700">
+                                        <span className="font-medium">🕒 Start:</span>{' '}
+                                        {formatDate(draft.start?.dateTime)}
+                                    </p>
+                                    <p className="text-sm text-slate-700">
+                                        <span className="font-medium">⏰ End:</span>{' '}
+                                        {formatDate(draft.end?.dateTime)}
+                                    </p>
+                                    <p className="text-sm text-slate-700">
+                                        <span className="font-medium">📌 Reminder:</span>{' '}
+                                        {draft.reminderMinutesBeforeStart} mins before
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="border border-slate-300 rounded-lg p-6 text-center bg-slate-50">
+                            <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold text-slate-800 mb-2">{message}</h3>
+                        </div>
+                    )}
+                </div>
                 {filteredReminders.map((reminder) => (
                     <div key={reminder.id} className="p-4 border border-gray-300 rounded-lg hover:shadow-md">
                         <div className="flex justify-between">
