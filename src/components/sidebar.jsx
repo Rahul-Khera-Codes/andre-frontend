@@ -14,15 +14,15 @@ import { useLocation, useNavigate } from "react-router-dom"
 
 const navigationItems = [
   { icon: Mail, label: "Email Automation", count: 12, href: "ai-draft" },
-  { icon: CheckSquare, label: "Task Management", count: 8, href: "task-management" },
+  // { icon: CheckSquare, label: "Task Management", count: 8, href: "task-management" },
   // { icon: FileText, label: "Document Review", count: 3, href: "#" },
   // { icon: Bot, label: "AI Drafts", count: 5, href: "ai-draft" },
   { icon: Calendar, label: "Calendar Integration", href: "calendar-management" },
   // { icon: BarChart3, label: "Analytics", href: "#" },
   // { icon: Archive, label: "Archive", href: "#" },
   // { icon: Shield, label: "Security", href: "#" },
-  { icon: MessageCircle, label: "Chat App", href: "chat" },
-  { icon: Settings, label: "Settings", href: "settings" },
+  // { icon: MessageCircle, label: "Chat App", href: "chat" },
+  // { icon: Settings, label: "Settings", href: "settings" },
 ]
 
 function Sidebar({ openSidebar }) {
@@ -36,7 +36,7 @@ function Sidebar({ openSidebar }) {
 
   return (
     <aside className="w-full h-full overflow-auto bg-white border-r border-slate-200">
-      <div className={openSidebar ? 'p-6' : 'p-2'}>
+      <div className={openSidebar ? 'p-4' : 'p-2'}>
         {/* <p className="text-sm text-slate-600 mb-6">
           Harnessing AI for Seamless Research Management
         </p> */}
@@ -50,11 +50,6 @@ function Sidebar({ openSidebar }) {
             >
               <item.icon className={`w-5 h-5 ${openSidebar && 'mr-3'} text-slate-700`} />
               {openSidebar && <span className="flex-1 text-[15px] text-left text-slate-800">{item.label}</span>}
-              {(openSidebar && item.count) && (
-                <span className="text-xs bg-slate-100 border border-slate-300 text-slate-700 px-2 py-0.5 rounded-full">
-                  {item.count}
-                </span>
-              )}
             </div>
           ))}
         </nav>

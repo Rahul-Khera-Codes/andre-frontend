@@ -31,7 +31,7 @@ axiosInstance.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         const response = await axios.post(
-          `${import.meta.env.VITE_BASE_URL}/api/v1/auth/refresh`,
+          `${import.meta.env.VITE_BASE_URL}/microsoft/auth/refresh`,
           { token: refreshToken }
         );
 

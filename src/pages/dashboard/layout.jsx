@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { ChevronsRightIcon } from 'lucide-react'
 import { authMicroSoftDetails } from '../../apis/auth'
 import { useDispatch } from 'react-redux'
-import { getProfileData } from '../../store/profileSlice'
+import { getProfileData, profileFetchedFailed } from '../../store/profileSlice'
 import Loader from '../../components/loader'
 import { getLoginStatusMsg } from '../../store/loginStatusMsgSlice'
 
@@ -37,13 +37,16 @@ function Dashboard() {
                 localStorage.setItem("mid", response?.data?.microsoft_id)
                 dispatch(getProfileData(response?.data))
             } else {
+                console.log(response)
                 dispatch(getLoginStatusMsg(response?.response?.data?.message))
+                dispatch(profileFetchedFailed(response?.response?.data?.message || response?.message))
                 navigate("/")
                 localStorage.clear()
             }
 
         } catch (error) {
             dispatch(getLoginStatusMsg("Network Connection"))
+            dispatch(profileFetchedFailed("Network Connection"))
             console.log(error)
         } finally {
             setLoading(false)
@@ -68,11 +71,11 @@ function Dashboard() {
         <div className='h-full w-full'>
             <div className='h-18 w-full'><Navbar /></div>
             <div className='h-[calc(100%-72px)] w-full flex'>
-                <div className={`${openSidebar ? 'w-74' : 'w-20'} relative h-full flex`}><Sidebar openSidebar={openSidebar} />
+                <div className={`${openSidebar ? 'w-65' : 'w-20'} relative h-full flex`}><Sidebar openSidebar={openSidebar} />
                     <div className={`absolute right-[-18px] group cursor-pointer transition-transform duration-200 ${openSidebar ? "rotate-180" : "rotate-0"
                         }`} onClick={handleClose}><div className="flex items-center gap-2"><div className='group-hover:hidden'><ChevronsRightIcon color='lightgray' /></div> <div className='hidden group-hover:block'> <ChevronsRightIcon /></div></div></div>
                 </div>
-                <div className={`${openSidebar ? 'w-[calc(100%-296px)]' : 'w-[calc(100%-80px)]'} h-full`}><Outlet /></div>
+                <div className={`${openSidebar ? 'w-[calc(100%-260px)]' : 'w-[calc(100%-80px)]'} h-full`}><Outlet /></div>
             </div>
         </div>
     )

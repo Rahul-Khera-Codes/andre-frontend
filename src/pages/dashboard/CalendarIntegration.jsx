@@ -14,6 +14,7 @@ import {
     Bot,
     Users,
     Zap,
+    Search,
 } from "lucide-react"
 import { format } from "date-fns"
 import { SelectDropdown } from "../../components/CustomDropDown"
@@ -110,8 +111,7 @@ function CalendarManagement() {
     function filteredData() {
         const data = calendarEvents.filter((draft) => {
             const matchesSearch =
-                draft.body_preview?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
-                draft.to_recipient_emails?.[0]?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+                draft.subject?.toLowerCase()?.includes(searchQuery?.toLowerCase())
             return matchesSearch
         })
         setFilteredDrafts(data)
@@ -126,16 +126,16 @@ function CalendarManagement() {
             console.log(mails)
             if (mails?.length > 0) {
                 setCalendarEvents(mails)
-                setFilteredDrafts(mails)
-                //filteredData(mails)
+                filteredData(mails)
             } else {
                 setCalendarEvents([])
-                // filteredData()
-                setMessage(response?.response?.data?.error ?? response?.message ?? "No Mails Found")
+                filteredData()
+                setMessage(response?.response?.data?.error ?? response?.message ?? "No Calendar Events Found")
             }
 
         } catch (error) {
             console.log(error)
+            setMessage("Network Connection Error")
         } finally {
             setLoading(false)
         }
@@ -143,7 +143,7 @@ function CalendarManagement() {
 
     useEffect(() => {
         fetchCalendarEvents()
-    }, [])
+    }, [searchQuery])
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -233,7 +233,7 @@ function CalendarManagement() {
         <div className="space-y-6 h-full w-full p-3 overflow-auto">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-serif font-bold text-slate-900">Reminder Management</h1>
+                    <h1 className="text-3xl font-serif font-bold text-slate-900">Calendar Events</h1>
                     <p className="text-slate-600 mt-1">Trigger task reminders via email, in-app alerts, or chat integrations</p>
                 </div>
                 <button onClick={() => setIsOpen(true)} className="flex items-center px-4 py-2 bg-green-800 cursor-pointer text-white rounded-lg hover:bg-green-700">
@@ -271,13 +271,16 @@ function CalendarManagement() {
                 </div>
             </div>
             <div className="p-4 border border-gray-300 rounded-lg flex gap-3">
-                <input
-                    className="flex-1 focus:ring-green-700 focus:outline-none focus:ring-1 border border-gray-300 px-3 py-2 rounded-lg"
-                    placeholder="Search reminders..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {dropDownList.map((e) => (
+                <div className="relative w-1/2">
+                    <input
+                        placeholder="Search Events..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-8 border focus:border-green-500 focus:outline-none border-slate-200 rounded-lg w-full py-[9.5px] text-sm"
+                    />
+                    <Search className="absolute top-5 left-3 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                </div>
+                {/* {dropDownList.map((e) => (
                     <React.Fragment key={e.name}>
                         <SelectDropdown
                             name={e.name}
@@ -291,7 +294,7 @@ function CalendarManagement() {
                             extraName={e.extraName}
                         />
                     </React.Fragment>
-                ))}
+                ))} */}
             </div>
             <div className="space-y-4">
                 <div className="space-y-4  scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 px-1">
@@ -300,44 +303,48 @@ function CalendarManagement() {
                             <Loader />
                         </div>
                     ) : !message ? (
-                        filteredDrafts.map((draft) => (
+                        filteredDrafts?.length > 0 ? filteredDrafts.map((draft) => (
                             <div
                                 key={draft.event_id}
-                                className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                                onClick={() => {
-                                    setCalendarEvents(draft);
-                                    setEditMode(false);
-                                }}
+                                className="p-4 border border-gray-200 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
                             >
-                                <div className="flex justify-between items-start mb-2">
-                                    <h4 className="text-base font-semibold text-slate-800 line-clamp-2">
-                                        📄 {draft.subject || 'No Subject'}
-                                    </h4>
-                                    <AlertTriangle
-                                        className={`w-4 h-4 mt-1 ${getPriorityColor(draft.body.content)}`}
-                                    />
-                                </div>
+                                <div className="flex justify-between">
+                                    <div className="space-y-2 w-full">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-lg">📄</span>
+                                            <h3 className="font-semibold text-slate-800 line-clamp-2">
+                                                {draft.subject || 'No Subject'}
+                                            </h3>
+                                        </div>
 
-                                <p className="text-sm text-slate-600 line-clamp-2 mb-3">
-                                    ✏️ {draft.body.content || 'No content provided'}
-                                </p>
+                                        <p className="text-sm text-slate-600 line-clamp-2">
+                                            ✏️ {draft.body.content || 'No content provided'}
+                                        </p>
 
-                                <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 space-y-1">
-                                    <p className="text-sm text-slate-700">
-                                        <span className="font-medium">🕒 Start:</span>{' '}
-                                        {formatDate(draft.start?.dateTime)}
-                                    </p>
-                                    <p className="text-sm text-slate-700">
-                                        <span className="font-medium">⏰ End:</span>{' '}
-                                        {formatDate(draft.end?.dateTime)}
-                                    </p>
-                                    <p className="text-sm text-slate-700">
-                                        <span className="font-medium">📌 Reminder:</span>{' '}
-                                        {draft.reminderMinutesBeforeStart} mins before
-                                    </p>
+                                        <div className="flex gap-4 text-sm text-slate-500">
+                                            <div className="flex items-center gap-1">
+                                                🕒 Start: {" "}
+                                                {formatDate(draft.start?.dateTime)}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                ⏰ End: {" "}
+                                                {formatDate(draft.end?.dateTime)}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2 flex-wrap">
+                                            <span className="px-2 py-1 text-xs rounded border bg-slate-50 text-slate-600">
+                                                ⏰ Reminder: {draft.reminderMinutesBeforeStart} mins before
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        ))
+
+                        )) : <div className="border border-slate-300 rounded-lg p-6 text-center bg-slate-50">
+                            <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold text-slate-800 mb-2">No Calendar Events Found</h3>
+                        </div>
                     ) : (
                         <div className="border border-slate-300 rounded-lg p-6 text-center bg-slate-50">
                             <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
@@ -345,7 +352,7 @@ function CalendarManagement() {
                         </div>
                     )}
                 </div>
-                {filteredReminders.map((reminder) => (
+                {/* {filteredReminders.map((reminder) => (
                     <div key={reminder.id} className="p-4 border border-gray-300 rounded-lg hover:shadow-md">
                         <div className="flex justify-between">
                             <div className="space-y-2">
@@ -398,7 +405,7 @@ function CalendarManagement() {
                         <p className="font-semibold">No reminders found</p>
                         <p className="text-slate-500 text-sm">Try adjusting filters or create a new reminder.</p>
                     </div>
-                )}
+                )} */}
                 {isOpen && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
                         <div className="bg-white rounded-2xl shadow-xl w-full max-h-[90vh] overflow-auto max-w-2xl p-6 space-y-6">

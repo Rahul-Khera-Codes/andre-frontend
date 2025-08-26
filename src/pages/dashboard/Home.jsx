@@ -16,6 +16,7 @@ function Home() {
   const userDetails = useSelector((state) => state.profile)
 
   if (userDetails?.loading) return <Loader />
+
   return (
     <div className="space-y-6 h-full overflow-auto p-3">
       <div className="bg-gradient-to-r from-blue-100 to-green-100 rounded-lg p-6">

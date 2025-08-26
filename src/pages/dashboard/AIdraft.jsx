@@ -15,11 +15,13 @@ import {
   Sparkles,
   FileText,
   Mail,
+  Search,
 } from "lucide-react"
 import { SelectDropdown } from "../../components/CustomDropDown"
 import { getAutomateEmails } from "../../apis/emailAutomation"
 import Loader from "../../components/loader"
 import { IoClose } from "react-icons/io5"
+import { BiLeftArrowAlt } from "react-icons/bi"
 
 function AIDraftReview() {
 
@@ -163,7 +165,7 @@ function AIDraftReview() {
     })
   }
 
-  const statusOptions = [{ label: "All", key: "all" }, { label: "Sentitems", key: "sentitems" }, { label: "Draft", key: "draft" }, { label: "Inbox", key: "inbox" },]
+  const statusOptions = [{ label: "All", key: "all" }, { label: "Junk Email", key: "junk_email" }, { label: "Drafts", key: "drafts" }, { label: "Inbox", key: "inbox" }, { label: "Deleted Items", key: "deleted_items" }, { label: "Sent Items", key: "sent_items" }]
   return (
     <div className="space-y-6 h-full w-full overflow-auto p-3">
       {/* Header */}
@@ -184,23 +186,19 @@ function AIDraftReview() {
 
       {/* Main Grid */}
       <div className="flex w-full h-full gap-6">
-        {/* Left Panel */}
-        <div className={`space-y-4 ${selectedDraft?.body_preview ? 'w-[35%]' : 'w-full'}`}>
-          <div className="border flex gap-3 w-full border-slate-300 rounded-lg p-4">
-            <div className="w-1/2">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold">Search Emails</h2>
-                <span className="bg-gray-100 px-2 py-0.5 rounded-full text-xs">{filteredDrafts.length}</span>
-              </div>
+
+        {!selectedDraft?.message_id ? <div className={`space-y-4 w-full`}>
+          <div className="border flex md:flex-row flex-col gap-3 w-full border-slate-300 rounded-lg p-4">
+            <div className="relative md:w-1/2 w-full">
               <input
-                className="border focus:outline-none focus:ring-1 focus:ring-green-500 h-10 border-slate-200 w-full px-2 py-1 rounded-lg mb-2 text-sm"
-                placeholder="Search emails..."
+                placeholder="Search Emails..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 border focus:border-green-500 focus:outline-none border-slate-200 rounded-lg w-full py-[9.5px] text-sm"
               />
+              <Search className="absolute top-5 left-3 -translate-y-1/2 text-slate-400 w-4 h-4" />
             </div>
-            <div className="w-1/2">
-              <h2 className="text-lg font-semibold pb-3">Status</h2>
+            <div className="md:w-1/2 w-full">
               <SelectDropdown
                 name="status"
                 options={statusOptions}
@@ -209,156 +207,177 @@ function AIDraftReview() {
                   setSelectedStatus(updated)
                 }}
                 placeholder="Select"
-                className="w-full"
+                className="md:w-[204px] w-full"
                 extraName="Status"
               />
             </div>
           </div>
 
           {/* Drafts List */}
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {loading ? <div className="h-56 w-full"><Loader /></div> : !message ? filteredDrafts.map((draft) => (
+          <div className="space-y-2 overflow-y-auto">
+            {loading ? <div className="h-56 w-full"><Loader /></div> : !message ? filteredDrafts?.length > 0 ? <div className="space-y-2 gap-2 grid md:grid-cols-2 overflow-y-auto">{filteredDrafts.map((draft) => (
               <div
                 key={draft.message_id}
-                className={`border border-slate-300 rounded-lg p-3 cursor-pointer hover:shadow-sm ${selectedDraft?.message_id === draft.message_id ? "border-b-2 bg-[#e8e1e176] border-b-green-800" : ""
-                  }`}
+                className={`border border-gray-300 rounded-lg p-4 bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer
+    ${selectedDraft?.message_id === draft.message_id ? "border-b-2 bg-[#f0f0f0] border-b-green-800" : ""}
+  `}
                 onClick={() => {
-                  setSelectedDraft(draft)
-                  setEditMode(false)
+                  setSelectedDraft(draft);
+                  setEditMode(false);
                 }}
               >
-                <div className="flex items-start justify-between">
-                  <h4 className="font-medium text-sm leading-tight line-clamp-2">Subject: {draft.subject}</h4>
-                  <AlertTriangle className={`w-3 h-3 flex-shrink-0 ml-2 ${getPriorityColor(draft.priority)}`} />
+                {/* Header Row: Subject + Priority Icon */}
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-800 line-clamp-2">
+                      📄 {draft.subject || "No Subject"}
+                    </span>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-600">Sender: {draft?.sender_email}</p>
-                {draft?.to_recipient_emails?.length > 0 && draft?.to_recipient_emails?.map((e) => (
-                  <p key={e} className="text-xs text-slate-600">To: {e}</p>
-                ))}
-                <div className="flex items-center justify-between mt-1">
-                  <span className={`px-2 py-0.5 rounded text-xs flex items-center gap-1 ${getStatusColor(draft.status)}`}>
+
+                {/* Sender */}
+                {/* <p className="text-xs text-slate-600 mb-1">
+                  <span className="font-bold">Summary: </span> {draft.summarization?.[0]?.summary}
+                </p> */}
+                <p className="text-xs text-slate-600 mb-1">
+                  <span className="font-bold">Sender:</span> {draft.sender_email}
+                </p>
+
+                {/* Recipients */}
+                {draft?.to_recipient_emails?.length > 0 && (
+                  <div className="mb-2 space-y-0.5">
+                    {draft.to_recipient_emails.map((email) => (
+                      <p key={email} className="text-xs text-slate-600">
+                        <span className="font-medium">To:</span> {email}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {/* Status + Time */}
+                <div className="flex gap-2 items-center mt-2">
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs flex items-center gap-1 ${getStatusColor(draft.status)}`}
+                  >
                     {getStatusIcon(draft.status)}
                     {draft.status}
                   </span>
                   <span className="text-xs text-slate-500">{formatDate(draft.mail_time)}</span>
                 </div>
-                <div className="flex items-center justify-between text-xs text-slate-500 mt-1">
-                  <span>v{draft.version}</span>
-                  <span className="flex items-center gap-1">
-                    <Bot className="w-3 h-3" />
-                    {draft.confidence}%
-                  </span>
-                </div>
               </div>
-            )) : <div className="border border-slate-300 rounded-lg p-6 text-center">
+
+            ))} </div> : <div className="border border-slate-300 rounded-lg p-6 text-center">
+              <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">No Mails Found</h3>
+            </div> : <div className="border border-slate-300 rounded-lg p-6 text-center">
               <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-slate-900 mb-2">{message}</h3>
             </div>}
           </div>
         </div>
+          :
+          <div className="w-full h-full">
+            <p className="flex items-center gap-1 py-3 text-md hover:underline cursor-pointer w-fit" onClick={() => setSelectedDraft({})}><BiLeftArrowAlt />Back</p>
 
-        {/* Right Panel */}
-        {(selectedDraft?.body_preview) && <div className="w-[65%] h-full">
-
-          <div className="border border-slate-300 rounded-lg p-4">
-            {/* Status Row */}
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded flex items-center gap-1 ${getStatusColor(selectedDraft.status)}`}>
-                    {getStatusIcon(selectedDraft.status)}
-                    {selectedDraft.status}
-                  </span>
-                  <span className="border border-slate-300 px-2 py-0.5 rounded text-xs">v{selectedDraft.version}</span>
-                  <span className="border border-slate-300 px-2 py-0.5 rounded text-xs flex items-center gap-1">
-                    <Bot className="w-3 h-3" />
-                    {selectedDraft.aiModel}
-                  </span>
+            <div className="border border-slate-300 rounded-lg p-4">
+              {/* Status Row */}
+              <div className="flex items-start justify-between">
+                <div>
+                  {/* <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded flex items-center gap-1 ${getStatusColor(selectedDraft.status)}`}>
+                      {getStatusIcon(selectedDraft.status)}
+                      {selectedDraft.status}
+                    </span>
+                    <span className="border border-slate-300 px-2 py-0.5 rounded text-xs">v{selectedDraft.version}</span>
+                    <span className="border border-slate-300 px-2 py-0.5 rounded text-xs flex items-center gap-1">
+                      <Bot className="w-3 h-3" />
+                      {selectedDraft.aiModel}
+                    </span>
+                  </div> */}
+                  {editMode ? (
+                    <input
+                      value={editedSubject}
+                      onChange={(e) => setEditedSubject(e.target.value)}
+                      className="border border-slate-300 px-2 py-1 rounded w-full mt-2"
+                    />
+                  ) : (
+                    <h3 className="text-lg font-semibold mt-2">{selectedDraft.subject}</h3>
+                  )}
+                  <p className="text-xs text-slate-600">From: {selectedDraft?.sender_email}</p>
+                  {selectedDraft?.to_recipient_emails?.length > 0 && selectedDraft?.to_recipient_emails?.map((e) => (
+                    <p key={e} className="text-xs text-slate-600">To: {e}</p>
+                  ))}
                 </div>
-                {editMode ? (
-                  <input
-                    value={editedSubject}
-                    onChange={(e) => setEditedSubject(e.target.value)}
-                    className="border border-slate-300 px-2 py-1 rounded w-full mt-2"
-                  />
-                ) : (
-                  <h3 className="text-lg font-semibold mt-2">{selectedDraft.subject}</h3>
-                )}
-                <p className="text-xs text-slate-600">From: {selectedDraft?.sender_email}</p>
-                {selectedDraft?.to_recipient_emails?.length > 0 && selectedDraft?.to_recipient_emails?.map((e) => (
-                  <p key={e} className="text-xs text-slate-600">To: {e}</p>
-                ))}
+                <div className="flex items-center gap-2">
+                  {editMode ? (
+                    <>
+                      <button className="border border-slate-300 px-3 py-1 rounded text-sm" onClick={() => setEditMode(false)}>Cancel</button>
+                      <button className="bg-green-800 text-white px-3 py-1 rounded text-sm flex items-center" onClick={handleSaveEdit}>
+                        <Save className="w-4 h-4 mr-1" /> Save
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {/* <button className="border  border-slate-300 px-3 py-1 rounded text-sm flex items-center" onClick={handleEditStart}>
+                        <Edit3 className="w-4 h-4 mr-1" /> Edit
+                      </button>
+                      <button onClick={() => setSelectedDraft({})} className="border cursor-pointer border-slate-300 px-3 py-1 rounded text-sm">
+                        <IoClose className="w-4 h-4" />
+                      </button> */}
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {editMode ? (
-                  <>
-                    <button className="border border-slate-300 px-3 py-1 rounded text-sm" onClick={() => setEditMode(false)}>Cancel</button>
-                    <button className="bg-green-800 text-white px-3 py-1 rounded text-sm flex items-center" onClick={handleSaveEdit}>
-                      <Save className="w-4 h-4 mr-1" /> Save
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button className="border  border-slate-300 px-3 py-1 rounded text-sm flex items-center" onClick={handleEditStart}>
-                      <Edit3 className="w-4 h-4 mr-1" /> Edit
-                    </button>
-                    <button onClick={() => setSelectedDraft({})} className="border cursor-pointer border-slate-300 px-3 py-1 rounded text-sm">
-                      <IoClose className="w-4 h-4" />
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
 
-            <hr className="my-4" style={{ color: "lightgray" }} />
+              <hr className="my-4" style={{ color: "lightgray" }} />
 
-            {editMode ? (
-              <textarea
-                value={editedContent}
-                onChange={(e) => setEditedContent(e.target.value)}
-                className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
-            ) : (
-              <textarea
-                value={selectedDraft.body_preview}
-                readOnly
-                className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
-            )}
+              {editMode ? (
+                <textarea
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-green-500"
+                />
+              ) : (
+                <textarea
+                  value={selectedDraft.body_preview}
+                  readOnly
+                  className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-green-500"
+                />
+              )}
 
 
-            <hr className="my-4" style={{ color: "lightgrey" }} />
+              <hr className="my-4" style={{ color: "lightgrey" }} />
 
-            {selectedDraft?.summarization?.length > 0 && selectedDraft?.summarization?.map((e, index) => (
-              <div key={index} className="mb-6 p-4 border border-slate-200 rounded-lg shadow-sm bg-white">
-                <h3 className="text-sm font-semibold text-slate-700 mb-2">📝 Summary:</h3>
-                <p className="text-sm text-slate-600 mb-4">{e.summary}</p>
+              {selectedDraft?.summarization?.length > 0 && selectedDraft?.summarization?.map((e, index) => (
+                <div key={index} className="mb-6 p-4 border border-slate-200 rounded-lg shadow-sm bg-white">
+                  <h3 className="text-sm font-semibold text-slate-700 mb-2">📝 Summary:</h3>
+                  <p className="text-sm text-slate-600 mb-4">{e.summary}</p>
 
-                {e?.calendar?.length > 0 && (
-                  <div className="space-y-4">
-                    {e.calendar.map((each, i) => (
-                      <div key={i} className="p-3 border border-slate-100 rounded-md bg-slate-50">
-                        <p className="text-xs text-slate-700"><span className="font-semibold">🕒 Start Time:</span> {formatDate(each.start.dateTime)}</p>
-                        <p className="text-xs text-slate-700"><span className="font-semibold">⏰ End Time:</span> {formatDate(each.end.dateTime)}</p>
-                        <p className="text-xs text-slate-700"><span className="font-semibold">📌 Subject:</span> {each.subject}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                  {e?.calendar?.length > 0 && (
+                    <div className="space-y-4">
+                      {e.calendar.map((each, i) => (
+                        <div key={i} className="p-3 border border-slate-100 rounded-md bg-slate-50">
+                          <p className="text-xs text-slate-700"><span className="font-semibold">🕒 Start Time:</span> {formatDate(each.start.dateTime)}</p>
+                          <p className="text-xs text-slate-700"><span className="font-semibold">⏰ End Time:</span> {formatDate(each.end.dateTime)}</p>
+                          <p className="text-xs text-slate-700"><span className="font-semibold">📌 Subject:</span> {each.subject}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
 
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              {/* <div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                {/* <div>
                 <span className="font-medium text-slate-700">Created:</span>
                 <p className="text-slate-600">{formatDate(selectedDraft.createdAt)}</p>
               </div> */}
-              <div>
-                <span className="font-medium text-slate-700">Last Modified:</span>
-                <p className="text-slate-600">{formatDate(selectedDraft.mail_time)}</p>
-              </div>
-              {/* <div>
+                <div>
+                  <span className="font-medium text-slate-700">Last Modified:</span>
+                  <p className="text-slate-600">{formatDate(selectedDraft.mail_time)}</p>
+                </div>
+                {/* <div>
                 <span className="font-medium text-slate-700">Template:</span>
                 <p className="text-slate-600">{selectedDraft.template}</p>
               </div>
@@ -366,40 +385,40 @@ function AIDraftReview() {
                 <span className="font-medium text-slate-700">AI Confidence:</span>
                 <p className="text-slate-600">{selectedDraft.confidence}%</p>
               </div> */}
-            </div>
-            {/*
+              </div>
+              {/*
             <div className="mt-4">
               <span className="font-medium text-slate-700">Original Prompt:</span>
               <p className="text-slate-600 text-sm mt-1 italic">{selectedDraft.originalPrompt}</p>
             </div> */}
 
-            {!editMode && (
-              <div className="flex items-center gap-3 pt-4">
-                <button
-                  className="bg-green-800 text-white px-3 py-2 rounded flex items-center"
-                  onClick={() => handleStatusChange(selectedDraft.message_id, "sent")}
-                >
-                  <Send className="w-4 h-4 mr-2" /> Send Email
-                </button>
-                <button
-                  className="border border-slate-300 px-3 py-2 rounded flex items-center"
-                  onClick={() => handleStatusChange(selectedDraft.message_id, "approved")}
-                >
-                  <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
-                </button>
-                <button className="border border-slate-300 px-3 py-2 rounded flex items-center">
-                  <Mail className="w-4 h-4 mr-2" /> Save to Drafts
-                </button>
-              </div>
-            )}
-          </div>
+              {!editMode && (
+                <div className="flex items-center gap-3 pt-4">
+                  <button
+                    className="bg-green-800 text-white px-3 py-2 rounded flex items-center"
+                    onClick={() => handleStatusChange(selectedDraft.message_id, "sent")}
+                  >
+                    <Send className="w-4 h-4 mr-2" /> Send Email
+                  </button>
+                  <button
+                    className="border border-slate-300 px-3 py-2 rounded flex items-center"
+                    onClick={() => handleStatusChange(selectedDraft.message_id, "approved")}
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" /> Approve
+                  </button>
+                  <button className="border border-slate-300 px-3 py-2 rounded flex items-center">
+                    <Mail className="w-4 h-4 mr-2" /> Save to Drafts
+                  </button>
+                </div>
+              )}
+            </div>
 
-          {/* <div className="border rounded-lg p-6 text-center">
+            {/* <div className="border rounded-lg p-6 text-center">
                <Bot className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                <h3 className="text-lg font-semibold text-slate-900 mb-2">Select a draft to review</h3>
                <p className="text-slate-600">Choose a draft from the list to start reviewing and editing.</p>
              </div> */}
-        </div>
+          </div>
         }
       </div>
     </div>

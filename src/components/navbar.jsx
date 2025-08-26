@@ -6,24 +6,6 @@ import { useState } from "react";
 
 function Navbar() {
   const navigate = useNavigate();
-  const [calendarNotificationsEvents, setCalendarNotificationsEvents] = useState([])
-  
-  const fetchCalendarEvents = async () => {
-    try {
-      const response = await getCalandarEventsNotifications()
-      const mails = response?.data;
-      console.log(mails)
-      if (mails?.length > 0) {
-        setCalendarNotificationsEvents(mails)
-      } else {
-        setCalendarNotificationsEvents([])
-        setMessage(response?.response?.data?.error ?? response?.message ?? "No Mails Found")
-      }
-
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
   return (
     <header className="bg-white border-b h-full border-slate-200 px-6 py-4">
