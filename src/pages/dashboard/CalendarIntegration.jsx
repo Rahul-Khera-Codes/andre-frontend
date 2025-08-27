@@ -21,6 +21,7 @@ import { SelectDropdown } from "../../components/CustomDropDown"
 import CustomDatePicker from "../../components/CustomCalendar"
 import { getCalandarEvents } from "../../apis/calendarIntegration"
 import Loader from "../../components/loader"
+import { v4 as uuidv4 } from 'uuid';
 
 const mockReminders = [
     {
@@ -120,16 +121,16 @@ function CalendarManagement() {
 
     const fetchCalendarEvents = async () => {
         setLoading(true)
+        setMessage("")
         try {
             const response = await getCalandarEvents()
             const mails = response?.data;
             console.log(mails)
             if (mails?.length > 0) {
-                setCalendarEvents(mails)
-                filteredData(mails)
+                const custom = mails.map((e) => ({ ...e, ids: uuidv4() }))
+                setCalendarEvents(custom)
             } else {
                 setCalendarEvents([])
-                filteredData()
                 setMessage(response?.response?.data?.error ?? response?.message ?? "No Calendar Events Found")
             }
 
@@ -142,8 +143,12 @@ function CalendarManagement() {
     }
 
     useEffect(() => {
+        filteredData()
+    }, [searchQuery, calendarEvents])
+
+    useEffect(() => {
         fetchCalendarEvents()
-    }, [searchQuery])
+    }, [])
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -305,7 +310,7 @@ function CalendarManagement() {
                     ) : !message ? (
                         filteredDrafts?.length > 0 ? filteredDrafts.map((draft) => (
                             <div
-                                key={draft.event_id}
+                                key={draft.ids}
                                 className="p-4 border border-gray-200 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
                             >
                                 <div className="flex justify-between">

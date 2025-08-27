@@ -22,7 +22,7 @@ function NotificationDropdown() {
     try {
       const response = await getCalandarEventsNotifications()
       const mails = response?.data
-      if (mails?.length > 0) {
+      if (mails?.length > 0 && mails?.[0]?.id) {
         setCalendarNotificationsEvents(mails)
         setMessage("")
       } else {
@@ -75,7 +75,7 @@ function NotificationDropdown() {
             <p className="font-semibold text-sm text-slate-700">Upcoming Calendar Events</p>
           </div>
 
-          <ul className="max-h-72 overflow-y-auto text-sm text-slate-700 divide-y divide-slate-100">
+          <ul className="max-h-72 min-h-45 overflow-y-auto text-sm text-slate-700 divide-y divide-slate-100">
             {calendarNotificationsEvents.length > 0 ? (
               calendarNotificationsEvents.map((event) => (
                 <li key={event.id} className="px-4 py-3 flex flex-col gap-1 hover:bg-slate-50 transition">
@@ -99,7 +99,7 @@ function NotificationDropdown() {
                 </li>
               ))
             ) : (
-              <li className="px-4 py-4 text-center text-slate-500">
+              <li className="px-4 py-4 h-45 flex justify-center items-center text-slate-500">
                 {message || "No new calendar events"}
               </li>
             )}
