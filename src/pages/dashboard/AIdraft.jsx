@@ -22,7 +22,6 @@ import { getAutomateEmails } from "../../apis/emailAutomation"
 import Loader from "../../components/loader"
 import { IoClose } from "react-icons/io5"
 import { BiLeftArrowAlt } from "react-icons/bi"
-import { v4 as uuidv4 } from 'uuid';
 
 function AIDraftReview() {
 
@@ -66,8 +65,7 @@ function AIDraftReview() {
       const mails = response?.data;
       console.log(mails)
       if (mails?.length > 0 && mails?.[0]?.message_id) {
-        const custom = mails.map((e) => ({ ...e, ids: uuidv4() }))
-        setDrafts(custom)
+        setDrafts(mails)
       } else {
         setDrafts([])
         setMessage(response?.response?.data?.error ?? response?.message ?? "No Mails Found")
@@ -187,7 +185,7 @@ function AIDraftReview() {
       {/* Main Grid */}
       <div className="flex w-full h-full gap-6">
 
-        {!selectedDraft?.ids ? <div className={`space-y-4 w-full`}>
+        {!selectedDraft?.message_id ? <div className={`space-y-4 w-full`}>
           <div className="border flex md:flex-row flex-col gap-3 w-full border-slate-300 rounded-lg p-4">
             <div className="relative md:w-1/2 w-full">
               <input
@@ -217,9 +215,9 @@ function AIDraftReview() {
           <div className="space-y-2 overflow-y-auto">
             {loading ? <div className="h-56 w-full"><Loader /></div> : !message ? filteredDrafts?.length > 0 ? <div className="space-y-2 gap-2 grid md:grid-cols-2 overflow-y-auto">{filteredDrafts.map((draft) => (
               <div
-                key={draft.ids}
+                key={draft.message_id}
                 className={`border border-gray-300 rounded-lg p-4 bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer
-    ${selectedDraft?.ids === draft.ids ? "border-b-2 bg-[#f0f0f0] border-b-green-800" : ""}
+    ${selectedDraft?.message_id === draft.message_id ? "border-b-2 bg-[#f0f0f0] border-b-green-800" : ""}
   `}
                 onClick={() => {
                   setSelectedDraft(draft);
