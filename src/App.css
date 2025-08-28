@@ -21,7 +21,7 @@
 .page-loader {
   width: 60px;
   aspect-ratio: 1.154;
-  --c: #0000 ,#1f8b48 2deg 59deg,#0000 61deg;
+  --c: #0000 ,#475a9d 2deg 59deg,#0000 61deg;
   --c1:conic-gradient(from 149deg at top   ,var(--c));
   --c2:conic-gradient(from -31deg at bottom,var(--c));
   background:

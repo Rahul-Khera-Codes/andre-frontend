@@ -9,10 +9,10 @@ const TeamsLogin = () => {
     const query = new URLSearchParams(path.search);
     const query_msg = query.get('response');
     const [error, setError] = useState("");
-    const msg=useSelector((state)=>state.loginStatusMsg.msg)
+    const msg = useSelector((state) => state.loginStatusMsg.msg)
 
     useEffect(() => {
-        if (query_msg==="error") {
+        if (query_msg === "error") {
             setError("Logined Failed")
         }
     }, [query_msg])
@@ -30,12 +30,15 @@ const TeamsLogin = () => {
             <div className="w-full max-w-md space-y-6 h-full">
                 <div className="text-center space-y-4">
                     <div className="flex items-center justify-center">
-                        <div className="w-12 h-12 bg-green-800 rounded-xl flex items-center justify-center">
+                        {/* <div className="w-12 h-12 bg-green-800 rounded-xl flex items-center justify-center">
                             <Shield className="w-6 h-6 text-white" />
+                        </div> */}
+                        <div className="w-80">
+                            <img src="./logo.png" alt="logo" className="object-cover"/>
                         </div>
                     </div>
                     <div>
-                        <h1 className="text-2xl font-serif font-bold text-slate-900">Biotech Operations</h1>
+                        {/* <h1 className="text-2xl font-serif font-bold text-slate-900">Biotech Operations</h1> */}
                         <p className="text-slate-600">Sign in to your secure dashboard</p>
                     </div>
                 </div>
@@ -56,10 +59,10 @@ const TeamsLogin = () => {
                     </button>
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-green-600 mt-0.5" />
+                    <Shield className="w-8 h-8 text-[#374A8C] mt-0.5" />
                     <div>
-                        <h4 className="font-medium text-green-900 mb-1">Enterprise Security</h4>
-                        <p className="text-sm text-green-700">
+                        <h4 className="font-bold text-[#374A8C] mb-1">Enterprise Security</h4>
+                        <p className="text-sm text-[#58585b]">
                             Your data is protected with enterprise-grade encryption and security protocols. All activities are logged
                             for compliance.
                         </p>

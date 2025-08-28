@@ -8,19 +8,16 @@ function Navbar() {
   const navigate = useNavigate();
 
   return (
-    <header className="bg-white border-b h-full border-slate-200 px-6 py-4">
+    <header className="bg-white border-b h-full border-slate-200 px-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate("/dashboard")}>
-            <div className="w-8 h-8 bg-green-800 rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 bg-white rounded-sm"></div>
+            <div className="w-45">
+              <img src="./logo.png" alt="logo" className="object-cover"/>
             </div>
-            <h1 className="text-xl font-serif font-bold text-slate-900">
-              Biotech Operations
-            </h1>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 pt-2">
           {/* <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
             <input

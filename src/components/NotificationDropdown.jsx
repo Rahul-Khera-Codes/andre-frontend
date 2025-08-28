@@ -63,7 +63,7 @@ function NotificationDropdown() {
       >
         <Bell className="w-5 h-5 text-slate-600" />
         {calendarNotificationsEvents.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-[#374A8C] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
             {calendarNotificationsEvents.length}
           </span>
         )}
