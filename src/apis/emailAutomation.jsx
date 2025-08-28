@@ -9,3 +9,13 @@ export const getAutomateEmails = async (data) => {
         return error;
     }
 };
+
+export const draftAutomateEmails = async (payload) => {
+    try {
+        const response = await axiosInstance.post(`/microsoft/get/mails/`,payload);
+        return response;
+    } catch (error) {
+        console.error(error);
+        return error;
+    }
+};

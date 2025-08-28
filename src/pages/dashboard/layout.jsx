@@ -73,9 +73,9 @@ function Dashboard() {
             <div className='h-[calc(100%-72px)] w-full flex'>
                 <div className={`${openSidebar ? 'w-65' : 'w-20'} relative h-full flex`}><Sidebar openSidebar={openSidebar} />
                     <div className={`absolute right-[-18px] group cursor-pointer transition-transform duration-200 ${openSidebar ? "rotate-180" : "rotate-0"
-                        }`} onClick={handleClose}><div className="flex items-center gap-2"><div className='group-hover:hidden'><ChevronsRightIcon color='lightgray' /></div> <div className='hidden group-hover:block'> <ChevronsRightIcon /></div></div></div>
+                        }`} onClick={handleClose}><div className="flex items-center gap-2"><div className='group-hover:hidden bg-[#93a7d7] rounded-full'><ChevronsRightIcon color='lightgray' /></div> <div className='hidden group-hover:block bg-[#425990] rounded-full'> <ChevronsRightIcon color='white'/></div></div></div>
                 </div>
-                <div className={`${openSidebar ? 'w-[calc(100%-260px)]' : 'w-[calc(100%-80px)]'} h-full`}><Outlet /></div>
+                <div className={`${openSidebar ? 'w-[calc(100%-260px)]' : 'w-[calc(100%-80px)]'} h-full bg-[#f3fafa]`}><Outlet /></div>
             </div>
         </div>
     )

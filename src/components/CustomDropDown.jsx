@@ -46,7 +46,7 @@ export const SelectDropdown = ({ name, options, placeholder = 'Select', value, o
                 type="button"
                 disabled={disabled}
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex justify-between items-center w-full border ${(errors?.[name] || errors?.calendar_choosed) ? 'border-red-500' : 'border-[#E1E4EA]'} rounded-lg px-3 py-2 bg-white text-left hover:cursor-pointer focus:outline-none focus:border-[#374A8C]`}
+                className={`flex justify-between items-center w-full border ${(errors?.[name] || errors?.calendar_choosed) ? 'border-red-500' : 'border-[#E1E4EA]'} rounded-lg px-3 py-[10px] text-left hover:cursor-pointer focus:outline-none bg-gray-50 focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-100`}
             >
                 <span className={`block truncate ${!optionLabel ? 'text-[#5A687C]' : `${name == "lead_status" ? 'text-[#374A8C]' : 'text-[#1E1E1E]'}`}`}>
                     {extraName ? `${extraName}: ${optionLabel?.label}` : (optionLabel?.label || placeholder)}
