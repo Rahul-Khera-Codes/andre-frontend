@@ -146,7 +146,7 @@ function Home() {
           <p className="text-sm text-slate-500 mt-1">Streamline your workflows with automated email notifications</p>
         </div>
         <div className="p-4 flex flex-wrap gap-3">
-          <button className="flex items-center bg-green-800 text-white px-4 py-2 rounded-md hover:bg-green-900 cursor-pointer transition">
+          <button className="flex items-center bg-[#374A8C] text-white px-4 py-2 rounded-md hover:bg-[#37498c95] cursor-pointer transition">
             <Bot className="w-4 h-4 mr-2" />
             Generate AI Draft
           </button>

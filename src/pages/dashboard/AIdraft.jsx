@@ -152,6 +152,26 @@ function AIDraftReview() {
     }
   }
 
+  const htmlToPlainText = (html) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+
+    const elementsToRemove = tempDiv.querySelectorAll("style, script");
+    elementsToRemove.forEach(el => el.remove());
+
+    tempDiv.querySelectorAll("br, li").forEach(el => {
+      el.replaceWith("\n" + el.textContent);
+    });
+
+    tempDiv.querySelectorAll("p").forEach(el => {
+      el.replaceWith(el.textContent + "\n");
+    });
+
+    return tempDiv.textContent
+      .replace(/\n\s*\n/g, "\n")
+      .trim();
+  };
+
 
 
   const formatDate = (dateString) => {
@@ -192,7 +212,7 @@ function AIDraftReview() {
                 placeholder="Search Emails..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 border focus:border-green-500 focus:outline-none border-slate-200 rounded-lg w-full py-[9.5px] text-sm"
+                className="pl-8 border focus:border-[#374A8C] focus:outline-none border-slate-200 rounded-lg w-full py-[9.5px] text-sm"
               />
               <Search className="absolute top-5 left-3 -translate-y-1/2 text-slate-400 w-4 h-4" />
             </div>
@@ -217,7 +237,7 @@ function AIDraftReview() {
               <div
                 key={draft.message_id}
                 className={`border border-gray-300 rounded-lg p-4 bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer
-    ${selectedDraft?.message_id === draft.message_id ? "border-b-2 bg-[#f0f0f0] border-b-green-800" : ""}
+    ${selectedDraft?.message_id === draft.message_id ? "border-b-2 bg-[#f0f0f0] border-b-[#374A8C]" : ""}
   `}
                 onClick={() => {
                   setSelectedDraft(draft);
@@ -260,7 +280,7 @@ function AIDraftReview() {
                     {getStatusIcon(draft.status)}
                     {draft.status}
                   </span>
-                  <span className="text-xs text-slate-500">{formatDate(draft.mail_time)}</span>
+                  <span className="text-xs text-slate-500">{formatDate(draft.received_date_time)}</span>
                 </div>
               </div>
 
@@ -333,13 +353,13 @@ function AIDraftReview() {
                 <textarea
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-green-500"
+                  className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-[#374A8C]"
                 />
               ) : (
                 <textarea
                   value={selectedDraft.body_preview}
                   readOnly
-                  className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-green-500"
+                  className="border border-slate-300 rounded w-full p-2 h-64 resize-none focus:outline-none focus:ring-1 focus:ring-[#374A8C]"
                 />
               )}
 
@@ -364,6 +384,27 @@ function AIDraftReview() {
                   )}
                 </div>
               ))}
+
+              {selectedDraft?.reply && (
+                <div className="mb-6 p-6 border border-slate-200 rounded-xl shadow-md bg-white">
+                  <h3 className="text-sm font-semibold text-slate-600 mb-3 flex items-center gap-2">
+                    🗨️ <span>Reply</span>
+                  </h3>
+
+                  <textarea
+                    value={htmlToPlainText(selectedDraft.reply)}
+                    onChange={(e) =>
+                      setSelectedDraft(prev => ({
+                        ...prev,
+                        reply: e.target.value,
+                      }))
+                    }
+                    placeholder="Write your reply..."
+                    className="w-full h-64 p-4 text-sm text-slate-800 bg-white border border-slate-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#374A8C] focus:border-transparent transition-shadow"
+                  />
+                </div>
+              )}
+
 
 
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -393,7 +434,7 @@ function AIDraftReview() {
               {!editMode && (
                 <div className="flex items-center gap-3 pt-4">
                   <button
-                    className="bg-green-800 text-white px-3 py-2 rounded flex items-center"
+                    className="bg-[#374A8C] text-white px-3 py-2 rounded flex items-center"
                     onClick={() => handleStatusChange(selectedDraft.message_id, "sent")}
                   >
                     <Send className="w-4 h-4 mr-2" /> Send Email

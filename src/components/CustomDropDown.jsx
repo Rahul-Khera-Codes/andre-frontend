@@ -46,9 +46,9 @@ export const SelectDropdown = ({ name, options, placeholder = 'Select', value, o
                 type="button"
                 disabled={disabled}
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex justify-between items-center w-full border ${(errors?.[name] || errors?.calendar_choosed) ? 'border-red-500' : 'border-[#E1E4EA]'} rounded-lg px-3 py-2 bg-white text-left hover:cursor-pointer focus:outline-none focus:border-[#7edf99]`}
+                className={`flex justify-between items-center w-full border ${(errors?.[name] || errors?.calendar_choosed) ? 'border-red-500' : 'border-[#E1E4EA]'} rounded-lg px-3 py-2 bg-white text-left hover:cursor-pointer focus:outline-none focus:border-[#374A8C]`}
             >
-                <span className={`block truncate ${!optionLabel ? 'text-[#5A687C]' : `${name == "lead_status" ? 'text-[#7be174]' : 'text-[#1E1E1E]'}`}`}>
+                <span className={`block truncate ${!optionLabel ? 'text-[#5A687C]' : `${name == "lead_status" ? 'text-[#374A8C]' : 'text-[#1E1E1E]'}`}`}>
                     {extraName ? `${extraName}: ${optionLabel?.label}` : (optionLabel?.label || placeholder)}
                 </span>
                 {!hideArrow && (
@@ -63,7 +63,7 @@ export const SelectDropdown = ({ name, options, placeholder = 'Select', value, o
                         {options?.length > 0 && options.map((option) => (
                             <li
                                 key={option.key}
-                                className={`cursor-pointer font-[400] select-none relative px-4 py-2 hover:bg-[#F4F5F6] hover:rounded-lg hover:text-[#7edca0] ${value === option.key ? 'text-[#3ce76f] bg-[#F4F5F6] rounded-lg' : 'text-[#5A687C]'}`}
+                                className={`cursor-pointer font-[400] select-none relative px-4 py-2 hover:bg-[#F4F5F6] hover:rounded-lg hover:text-[#314cae] ${value === option.key ? 'text-[#374A8C] bg-[#F4F5F6] rounded-lg' : 'text-[#5A687C]'}`}
                                 onClick={() => handleSelect(option.key)}
                             >
                                 {option.label}

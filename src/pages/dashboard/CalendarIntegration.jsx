@@ -239,7 +239,7 @@ function CalendarManagement() {
                     <h1 className="text-3xl font-serif font-bold text-slate-900">Calendar Events</h1>
                     <p className="text-slate-600 mt-1">Trigger task reminders via email, in-app alerts, or chat integrations</p>
                 </div>
-                <button onClick={() => setIsOpen(true)} className="flex items-center px-4 py-2 bg-green-800 cursor-pointer text-white rounded-lg hover:bg-green-700">
+                <button onClick={() => setIsOpen(true)} className="flex items-center px-4 py-2 bg-[#374A8C] cursor-pointer text-white rounded-lg hover:bg-green-700">
                     <Plus className="w-4 h-4 mr-2" /> New Reminder
                 </button>
             </div>
@@ -279,7 +279,7 @@ function CalendarManagement() {
                         placeholder="Search Events..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8 border focus:border-green-500 focus:outline-none border-slate-200 rounded-lg w-full py-[9.5px] text-sm"
+                        className="pl-8 border focus:border-[#374A8C] focus:outline-none border-slate-200 rounded-lg w-full py-[9.5px] text-sm"
                     />
                     <Search className="absolute top-5 left-3 -translate-y-1/2 text-slate-400 w-4 h-4" />
                 </div>
