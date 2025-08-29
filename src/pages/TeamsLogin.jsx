@@ -58,7 +58,7 @@ const TeamsLogin = () => {
                         <BsMicrosoftTeams className="mr-2 text-xl" color="#5159C3" /> Continue with Microsoft Teams
                     </button>
                 </div>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+                <div className="bg-[#ebedf5] border border-[#9eb1f6] rounded-lg p-4 flex items-start gap-3">
                     <Shield className="w-8 h-8 text-[#374A8C] mt-0.5" />
                     <div>
                         <h4 className="font-bold text-[#374A8C] mb-1">Enterprise Security</h4>

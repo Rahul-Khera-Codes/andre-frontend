@@ -59,48 +59,63 @@ function NotificationDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative flex items-center justify-center p-2 rounded-md cursor-pointer transition"
+        className="relative flex bg-[#ffffff83] items-center justify-center p-3 rounded-xl cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
       >
-        <Bell className="w-5 h-5 text-slate-600" />
+        <Bell className="w-5 h-5 text-gray-800" />
         {calendarNotificationsEvents.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-[#374A8C] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1  bg-[#6D75A2] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">
             {calendarNotificationsEvents.length}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white shadow-xl border border-slate-200 rounded-md z-50">
-          <div className="px-4 py-2 border-b border-slate-100 bg-slate-50">
-            <p className="font-semibold text-sm text-slate-700">Upcoming Calendar Events</p>
+        <div className="absolute right-0 mt-2 w-96 bg-gradient-to-br from-white to-blue-50 shadow-2xl border border-blue-200 rounded-2xl z-50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-blue-100 bg-gradient-to-r from-blue-500 to-cyan-500">
+            <p className="font-semibold text-sm text-white flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Upcoming Calendar Events
+            </p>
           </div>
 
-          <ul className="max-h-72 min-h-45 overflow-y-auto text-sm text-slate-700 divide-y divide-slate-100">
+          <ul className="max-h-72 min-h-45 overflow-y-auto text-sm text-slate-700 divide-y divide-blue-100">
             {calendarNotificationsEvents.length > 0 ? (
               calendarNotificationsEvents.map((event) => (
-                <li key={event.id} className="px-4 py-3 flex flex-col gap-1 hover:bg-slate-50 transition">
-                  <div className="flex items-start gap-2">
-                    <CalendarClock className="w-5 h-5 text-blue-500 mt-0.5" />
+                <li
+                  key={event.id}
+                  className="px-4 py-3 flex flex-col gap-2 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-all duration-300 border-l-4 border-transparent hover:border-blue-400"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
+                      <CalendarClock className="w-4 h-4 text-white" />
+                    </div>
                     <div className="flex-1">
                       <p className="font-medium text-slate-800">{event.subject}</p>
-                      <p className="text-slate-500 text-sm">{event.bodyPreview}</p>
+                      <p className="text-slate-600 text-sm">{event.bodyPreview}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
-                    <div className="flex items-center gap-1">
-                      <Clock4 className="w-4 h-4" />
-                      <span>{formatDate(event.start.dateTime)}</span>
+                  <div className="flex items-center gap-4 mt-1 text-xs text-slate-500">
+                    <div className="flex items-center gap-1 bg-gradient-to-r from-purple-100 to-pink-100 px-2 py-1 rounded-full">
+                      <div className="p-1 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full">
+                        <Clock4 className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-purple-700 font-medium">{formatDate(event.start.dateTime)}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>{event.location.displayName || "Online"}</span>
+                    <div className="flex items-center gap-1 bg-gradient-to-r  from-green-100 to-emerald-100 px-2 py-1 rounded-full">
+                      <div className="p-1 bg-gradient-to-br from-green-500 to-emerald-500  rounded-full">
+                        <MapPin className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-green-700 font-medium">{event.location.displayName || "Online"}</span>
                     </div>
                   </div>
                 </li>
               ))
             ) : (
-              <li className="px-4 py-4 h-45 flex justify-center items-center text-slate-500">
-                {message || "No new calendar events"}
+              <li className="px-4 py-8 h-45 flex flex-col justify-center items-center text-slate-500">
+                <div className="p-4 bg-gradient-to-br from-gray-100 to-slate-100 rounded-full mb-3">
+                  <Bell className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-center">{message || "No new calendar events"}</p>
               </li>
             )}
           </ul>
