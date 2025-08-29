@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
     UploadCloud,
     FileText,
@@ -10,6 +10,8 @@ import {
     CalendarClock,
 } from "lucide-react"
 import Loader from "../../components/loader"
+import Header from "../../components/Header"
+import { summarizeFiles } from "../../apis/fileupload"
 
 
 function KindIcon({ kind }) {
@@ -51,6 +53,7 @@ export default function FilesPage() {
     const [isUploading, setIsUploading] = useState(false)
     const [error, setError] = useState(null)
     const [isDragging, setIsDragging] = useState(false)
+    const inputFile = useRef()
     const [data, setData] = useState({
         items: [
             {
@@ -139,17 +142,16 @@ export default function FilesPage() {
         setError(null)
         setIsUploading(true)
         try {
-            const fd = new FormData()
-            fd.append("file", file)
-            const res = await fetch("/api/files", { method: "POST", body: fd })
-            if (!res.ok) {
-                const j = await res.json().catch(() => ({}))
-                throw new Error(j?.error || "Upload failed")
-            }
+            const payload = new FormData()
+            payload.append("file_type", "pdf")
+            payload.append("document", file)
+            const response = await summarizeFiles(payload)
+            console.log(response)
         } catch (err) {
             setError(err?.message ?? "Upload failed")
         } finally {
             setIsUploading(false)
+             inputFile.current.value = ""
         }
     }
 
@@ -167,12 +169,9 @@ export default function FilesPage() {
     return (
         <div className="h-full w-full overflow-auto p-3">
             <div className="mx-auto flex flex-col gap-6">
-                <div className="flex items-center justify-between bg-gradient-to-r from-[#7388a5] to-[#d4d7e0] p-6 rounded-2xl text-white shadow-lg">
-                    <div>
-                        <h1 className="text-3xl font-serif font-bold">File Upload & Summaries</h1>
-                        <p className="text-purple-100 mt-1">Upload files and view concise summaries fetched from the API.</p>
-                    </div>
-                </div>
+
+                <Header header={"File Upload & Summaries"} description={"Upload files and view concise summaries fetched from the API."} />
+
 
                 <section className="mb-8 rounded-xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur-sm">
                     <div
@@ -211,7 +210,7 @@ export default function FilesPage() {
                         </div>
                         <label className="mt-2 inline-flex cursor-pointer items-center justify-center rounded-md bg-indigo-600/90 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-300">
                             {isUploading ? "Uploading..." : "Choose File"}
-                            <input type="file" onChange={onUpload} className="sr-only" aria-label="Upload file" />
+                            <input type="file" ref={inputFile} onChange={onUpload} className="sr-only" aria-label="Upload file" />
                         </label>
                         {error && (
                             <p className="mt-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">

@@ -21,6 +21,7 @@ import { SelectDropdown } from "../../components/CustomDropDown"
 import CustomDatePicker from "../../components/CustomCalendar"
 import { getCalandarEvents } from "../../apis/calendarIntegration"
 import Loader from "../../components/loader"
+import Header from "../../components/Header"
 
 const mockReminders = [
   {
@@ -280,18 +281,7 @@ function CalendarManagement() {
 
   return (
     <div className="space-y-6 h-full w-full p-3 overflow-auto bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
-      <div className="flex items-center justify-between bg-gradient-to-r from-[#6e80b6] to-[#9fb4f2] p-6 rounded-2xl text-white shadow-lg">
-        <div>
-          <h1 className="text-3xl font-serif font-bold">Calendar Events</h1>
-          <p className="text-purple-100 mt-1">Trigger task reminders via email, in-app alerts, or chat integrations</p>
-        </div>
-        <button
-          onClick={() => setIsOpen(true)}
-          className="flex items-center px-6 py-3 bg-gradient-to-r from-[#374A8C] to-[#374A8C] cursor-pointer text-white rounded-xl hover:from-[#5876df] hover:to-[#708ae8] shadow-lg transform hover:scale-105 transition-all duration-200"
-        >
-          <Plus className="w-5 h-5 mr-2" /> New Reminder
-        </button>
-      </div>
+      <Header header={"Calendar Events"} description={"Trigger task reminders via email, in-app alerts, or chat integrations"} buttonStatus={true} handler={setIsOpen} />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {

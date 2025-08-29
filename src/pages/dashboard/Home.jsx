@@ -4,6 +4,7 @@ import Loader from "../../components/loader"
 import { getAllEvents } from "../../apis/dashboard"
 import { useEffect, useState } from "react"
 import { FormatTimeAgo } from "../../utils/timeformat"
+import Header from "../../components/Header"
 
 function Home() {
   const [allEventsData, setAllEventsData] = useState({})
@@ -64,15 +65,8 @@ function Home() {
         <Loader />
       ) : (
         <div className="space-y-6 h-full overflow-auto p-3 bg-gradient-to-br from-slate-50 via-white to-blue-50">
-          <div className="bg-gradient-to-r from-[#6c7ebc] to-[#afb6ce] rounded-xl p-6 text-white shadow-lg">
-            <h2 className="text-2xl font-serif font-bold mb-2">
-              Welcome back,{" "}
-              {userDetails?.user?.given_name?.[0].toUpperCase() + userDetails?.user?.given_name?.slice(1) || "Test"}
-            </h2>
-            <p className="text-blue-100">
-              You have 12 pending email automations and 8 active tasks requiring attention.
-            </p>
-          </div>
+
+          <Header header={` Welcome back, ${userDetails?.user?.given_name?.[0].toUpperCase() + userDetails?.user?.given_name?.slice(1) || "Test"}`} description={"You have 12 pending email automations and 8 active tasks requiring attention."} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[

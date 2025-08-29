@@ -7,6 +7,7 @@ import { BiLeftArrowAlt } from "react-icons/bi"
 import { FormatTimeAgo } from "../../utils/timeformat"
 import { FaRegClock, FaReply } from "react-icons/fa"
 import { MdOutlineContentPasteGo, MdOutlineSummarize } from "react-icons/md"
+import Header from "../../components/Header"
 
 function AIDraftReview() {
   const [drafts, setDrafts] = useState([])
@@ -206,12 +207,9 @@ function AIDraftReview() {
   if (pageLoading) return <Loader />
   return (
     <div className="space-y-6 h-full w-full overflow-auto p-3 bg-gradient-to-br from-violet-50 via-white to-pink-50">
-      <div className="flex items-center justify-between bg-gradient-to-r from-[#6b84d8] to-[#889ee6] p-6 rounded-2xl text-white shadow-lg">
-        <div>
-          <h1 className="text-3xl font-serif font-bold">Email Automation</h1>
-          <p className="text-indigo-100 mt-1">Review documents securely and collaboratively</p>
-        </div>
-      </div>
+
+      <Header header={"Email Automation"} description={"Review documents securely and collaboratively"} />
+
 
       {/* Main Grid */}
       <div className="flex w-full h-full gap-6">
