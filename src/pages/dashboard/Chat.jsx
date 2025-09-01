@@ -1,20 +1,12 @@
 import { Bot } from "lucide-react"
 import { ChatInterface } from "../../components/ChatInterface"
+import Header from "../../components/Header"
 
 function Chat() {
     return (
-        <div className="flex flex-col h-full w-full p-3 overflow-auto">
-            <div className="border-b border-slate-200 flex gap-4 items-center">
-                <div className="text-emerald-700">
-                    <Bot className="w-12 h-12" />
-                </div>
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900 font-space-grotesk">AI Chat Assistant</h1>
-                    <p className="text-slate-600 mt-1">Get instant help with your biotech operations and research tasks</p>
-                </div>
-            </div>
-
-            <div className="flex-1 overflow-hidden">
+        <div className="space-y-6 h-full overflow-auto p-3 bg-gradient-to-br from-slate-50 via-white to-blue-50">
+            <Header header={`AI Chat Assistant`} description={"Get instant help with your biotech operations and research tasks"} />
+            <div className="flex-1 h-full overflow-hidden">
                 <ChatInterface />
             </div>
         </div>

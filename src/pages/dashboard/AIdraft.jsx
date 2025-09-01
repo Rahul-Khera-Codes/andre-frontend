@@ -8,6 +8,7 @@ import { FormatTimeAgo } from "../../utils/timeformat"
 import { FaRegClock, FaReply } from "react-icons/fa"
 import { MdOutlineContentPasteGo, MdOutlineSummarize } from "react-icons/md"
 import Header from "../../components/Header"
+import CustomInputField from "../../components/CustomInputField"
 
 function AIDraftReview() {
   const [drafts, setDrafts] = useState([])
@@ -216,17 +217,7 @@ function AIDraftReview() {
         {!selectedDraft?.message_id ? (
           <div className={`space-y-4 w-full`}>
             <div className="bg-white border-2 border-gray-100 flex md:flex-row flex-col gap-4 w-full rounded-2xl p-6 shadow-lg">
-              <div className="relative md:w-1/2 w-full">
-                <input
-                  placeholder="Search Emails..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 border-2 border-gray-200 bg-gray-50 focus:border-purple-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-100 rounded-xl w-full py-3 text-sm transition-all duration-200"
-                />
-                <div className="absolute top-1/2 left-4 -translate-y-1/2 bg-gradient-to-r from-purple-500 to-indigo-500 p-1.5 rounded-lg">
-                  <Search className="text-white w-4 h-4" />
-                </div>
-              </div>
+              <CustomInputField placeholder={"Search Emails..."} search={searchQuery} setSearch={setSearchQuery} extraStyles={`md:w-1/2 w-full`} />
               <div className="md:w-1/2 w-full">
                 <SelectDropdown
                   name="status"

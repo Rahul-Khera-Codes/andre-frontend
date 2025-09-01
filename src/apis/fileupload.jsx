@@ -14,3 +14,13 @@ export const summarizeFiles = async (payload) => {
         return error;
     }
 };
+
+export const getSummarizeFiles = async () => {
+    try {
+        const response = await axiosInstance.get(`/microsoft/summarize/`);
+        return response;
+    } catch (error) {
+        console.error(error);
+        return error;
+    }
+};

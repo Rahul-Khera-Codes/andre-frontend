@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 import Loader from "../../components/loader"
 import Header from "../../components/Header"
-import { summarizeFiles } from "../../apis/fileupload"
+import { getSummarizeFiles, summarizeFiles } from "../../apis/fileupload"
 
 
 function KindIcon({ kind }) {
@@ -125,7 +125,7 @@ export default function FilesPage() {
         ],
     })
 
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [pageLoading, setPageLoading] = useState(true)
 
     useEffect(() => {
@@ -137,6 +137,33 @@ export default function FilesPage() {
         }())
 
     }, [])
+
+    useEffect(() => {
+        if (data?.length > 0) {
+            setIsLoading(false)
+        }
+    }, [data])
+
+    useEffect(() => {
+        // fetchSummarizeData()
+    }, [])
+
+    const fetchSummarizeData = async () => {
+        setIsLoading(true)
+        try {
+            const response = await getSummarizeFiles();
+            console.log(response)
+            if (response?.status === 200) {
+                setData(response?.data)
+            } else {
+                setIsLoading(false)
+            }
+
+        } catch (error) {
+            console.log(error)
+            setIsLoading(false)
+        }
+    }
 
     async function uploadFile(file) {
         setError(null)
@@ -151,7 +178,7 @@ export default function FilesPage() {
             setError(err?.message ?? "Upload failed")
         } finally {
             setIsUploading(false)
-             inputFile.current.value = ""
+            inputFile.current.value = ""
         }
     }
 

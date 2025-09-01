@@ -23,7 +23,7 @@ const navigationItems = [
   // { icon: BarChart3, label: "Analytics", href: "#" },
   // { icon: Archive, label: "Archive", href: "#" },
   // { icon: Shield, label: "Security", href: "#" },
-  // { icon: MessageCircle, label: "Chat App", href: "chat" },
+  { icon: MessageCircle, label: "Chat App", href: "chat" },
   // { icon: Settings, label: "Settings", href: "settings" },
 ]
 

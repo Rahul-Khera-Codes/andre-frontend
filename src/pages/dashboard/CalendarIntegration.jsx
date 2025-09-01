@@ -22,6 +22,7 @@ import CustomDatePicker from "../../components/CustomCalendar"
 import { getCalandarEvents } from "../../apis/calendarIntegration"
 import Loader from "../../components/loader"
 import Header from "../../components/Header"
+import CustomInputField from "../../components/CustomInputField"
 
 const mockReminders = [
   {
@@ -306,17 +307,7 @@ function CalendarManagement() {
       </div>
 
       <div className="p-6 bg-white rounded-2xl shadow-lg border border-gray-100 flex gap-3">
-        <div className="relative w-1/2">
-          <input
-            placeholder="Search Events..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 border-2 border-gray-200 focus:border-gradient-to-r focus:from-purple-400 focus:to-blue-400 focus:outline-none rounded-xl w-full py-3 text-sm bg-gray-50 focus:bg-white transition-all duration-200"
-          />
-          <div className="absolute top-1/2 left-4 -translate-y-1/2 bg-gradient-to-r from-purple-500 to-blue-500 p-1.5 rounded-lg">
-            <Search className="text-white w-4 h-4" />
-          </div>
-        </div>
+        <CustomInputField placeholder={"Search Events..."} search={searchQuery} setSearch={setSearchQuery} extraStyles={`w-1/2`} />
       </div>
 
       <div className="space-y-2">
