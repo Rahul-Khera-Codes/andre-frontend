@@ -285,7 +285,7 @@ export function ChatInterface() {
 
     const newChat = () => {
         setMessages([{
-            id: crypto.randomUUID(),
+            id: uuidv4(),
             content: "Hello! I’m your Coretac.AI assistant. How can I help with email automation, tasks, or research today?",
             role: "assistant",
             timestamp: new Date(),
