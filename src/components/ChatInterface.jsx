@@ -41,6 +41,7 @@ export function ChatInterface() {
     const [historyChatsStatus, setHistoryChatsStatus] = useState(false)
 
     const [selectedFile, setSelectedFile] = useState(null)
+    const [fileError, setFileError] = useState("")
     const fileInputRef = useRef(null)
     const newSocketRef = useRef(null)
 
@@ -65,7 +66,10 @@ export function ChatInterface() {
                     }))
                     const existingIds = chats.map(chat => chat.conversation_id);
                     const filtered = customResponse.filter(e => !existingIds.includes(e.conversation_id));
-                    if (filtered.length > 0) {
+                    if (messages?.length === 0) {
+                        setActiveChatId(null)
+                    }
+                    else if (filtered.length > 0) {
                         setActiveChatId(filtered?.[0]?.conversation_id);
                     } else if (existingIds?.length === 0) {
                         setActiveChatId(customResponse?.[0]?.conversation_id);
@@ -323,6 +327,7 @@ export function ChatInterface() {
 
     const handleFileButton = () => fileInputRef.current?.click()
     const onFileChange = async (e) => {
+        setFileError("")
         setUploadingStatus(true)
         const file = e.target.files?.[0]
         if (file) {
@@ -331,8 +336,12 @@ export function ChatInterface() {
                 payload.append("file_type", "pdf")
                 payload.append("document", file)
                 const response = await summarizeFiles(payload)
+                if (response?.status === 202) {
+                    setSelectedFile(file)
+                } else {
+                    setFileError(response?.response?.message || "Internal Server Error! Please upload again")
+                }
                 fileInputRef.current.value = ""
-                setSelectedFile(file)
             } catch (error) {
                 console.log(error)
             } finally {
@@ -647,6 +656,13 @@ export function ChatInterface() {
                                 </div>
                             </div>
                         )}
+                        {fileError && <div className="mb-2 flex items-center gap-2">
+                            <p
+                                className="inline-flex bg-red-200 text-red-500 items-center gap-2 px-2 py-1 rounded-md text-xs"
+                            >
+                                {fileError}
+                            </p>
+                        </div>}
 
                         <div className="flex items-end gap-2">
                             <div className="flex items-center gap-1">
