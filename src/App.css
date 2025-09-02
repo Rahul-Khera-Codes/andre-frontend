@@ -69,8 +69,8 @@
   border: 3px solid #f3f3f3;
   border-top: 3px solid #53639B;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   animation: spin 0.8s linear infinite;
   display: inline-block;
 }

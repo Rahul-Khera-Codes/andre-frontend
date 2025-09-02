@@ -19,7 +19,7 @@ const navigationItems = [
   // { icon: FileText, label: "Document Review", count: 3, href: "#" },
   // { icon: Bot, label: "AI Drafts", count: 5, href: "ai-draft" },
   { icon: Calendar, label: "Calendar Integration", href: "calendar-management" },
-  { icon: File, label: "Upload File", href: "upload-file" },
+  // { icon: File, label: "Upload File", href: "upload-file" },
   // { icon: BarChart3, label: "Analytics", href: "#" },
   // { icon: Archive, label: "Archive", href: "#" },
   // { icon: Shield, label: "Security", href: "#" },

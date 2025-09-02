@@ -13,8 +13,10 @@ import {
 } from "lucide-react"
 import { v4 as uuidv4 } from 'uuid'
 import CustomInputField from "./CustomInputField"
-import { summarizeFiles } from "../apis/fileupload"
+import { deleteChatHistory, getChatHistory, summarizeFiles } from "../apis/fileupload"
 import chatInstance from "../apis/chatInstance"
+import { GiHamburgerMenu } from "react-icons/gi"
+import Loader from "./loader"
 
 const BRAND = {
     primary: "#455793",
@@ -26,71 +28,87 @@ const BRAND = {
 
 
 export function ChatInterface() {
-    const [messages, setMessages] = useState([
-        {
-            id: "1",
-            content: "Hello! I’m your Coretac.AI assistant. How can I help with email automation, tasks, or research today?",
-            role: "assistant",
-            timestamp: new Date(),
-        },
-    ])
+    const [messages, setMessages] = useState([])
     const [input, setInput] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [historyStatus, setHistoryStatus] = useState(true)
     const [chats, setChats] = useState([])
     const [activeChatId, setActiveChatId] = useState("")
     const [search, setSearch] = useState("")
+    const [payload, setPayload] = useState({})
+    const [uploadingStatus, setUploadingStatus] = useState(false)
+    const [messagesStatus, setMessagesStatus] = useState(false)
+    const [historyChatsStatus, setHistoryChatsStatus] = useState(false)
 
     const [selectedFile, setSelectedFile] = useState(null)
     const fileInputRef = useRef(null)
-    const existingSocketRef = useRef(null)
     const newSocketRef = useRef(null)
 
     const newwebsocketurl = `${chatInstance}/chat-llm`
-    const websocketurl = `${chatInstance}/chat-llm`
 
     const messagesEndRef = useRef(null)
 
-    const staticChats = [
-        { conversation_id: uuidv4(), content: `new Chat ${uuidv4()}` },
-        { conversation_id: uuidv4(), content: `new Chat ${uuidv4()}` },
-        { conversation_id: uuidv4(), content: `new Chat ${uuidv4()}` },
-        { conversation_id: uuidv4(), content: `new Chat ${uuidv4()}` },
-        { conversation_id: uuidv4(), content: `newa Chat ${uuidv4()}` },
-    ]
-
     useEffect(() => {
-        setChats(staticChats)
+        fecthHistoryChats()
     }, [])
 
-    useEffect(() => {
-        if (!activeChatId && chats.length === 0) {
-            const id = uuidv4()
-            const seed = {
-                id,
-                name: "New chat",
-                updatedAt: new Date().toISOString(),
-                messages: [
-                    {
-                        id: "seed",
-                        content: "New chat started. Share your goal or paste content to summarize.",
-                        role: "assistant",
-                        timestamp: new Date(),
-                    },
-                ],
+    const fecthHistoryChats = async (query = "") => {
+        try {
+            const response = await getChatHistory(query)
+            console.log(response?.data)
+            if (response?.status === 200) {
+                if (response?.data?.session?.length > 0) {
+                    const customResponse = response?.data?.session.map((e) => ({
+                        ...e,
+                        conversation_id: e.session_id,
+                        content: e.session_name
+                    }))
+                    const existingIds = chats.map(chat => chat.conversation_id);
+                    const filtered = customResponse.filter(e => !existingIds.includes(e.conversation_id));
+                    if (filtered.length > 0) {
+                        setActiveChatId(filtered?.[0]?.conversation_id);
+                    } else if (existingIds?.length === 0) {
+                        setActiveChatId(customResponse?.[0]?.conversation_id);
+                    }
+                    console.log(existingIds, filtered, "hugyftdrtyuij")
+                    setChats(customResponse)
+                }
+                if (response?.data?.messages?.length > 0) {
+                    const customResponse = response?.data?.messages.map((e) => ({
+                        ...e,
+                        id: uuidv4(),
+                        content: e.content,
+                        role: e.role,
+                        timestamp: e.timestamp,
+                    }))
+                    setMessages(customResponse)
+                }
             }
-            //setChats([seed])
-            setActiveChatId(id)
-            setMessages(seed.messages)
-        }
-    }, [activeChatId, chats.length])
 
-    useEffect(() => {
-        if (!activeChatId) return
-        const current = chats.find((c) => c.id === activeChatId)
-        if (current && current.messages) {
-            setMessages(current.messages.map((m) => ({ ...m, timestamp: new Date(m.timestamp) })))
+        } catch (error) {
+            console.log(error)
         }
-    }, [activeChatId])
+    }
+
+    const handleDeleteChats = async (query = "") => {
+        try {
+            const response = await deleteChatHistory(query)
+            console.log(response?.data)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+
+    // useEffect(() => {
+    //     if (!activeChatId) return
+    //     const current = chats.find((c) => c.id === activeChatId)
+    //     if (current && current.messages) {
+    //         setMessages(current.messages.map((m) => ({ ...m, timestamp: new Date(m.timestamp) })))
+    //     }
+    // }, [activeChatId])
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -102,11 +120,6 @@ export function ChatInterface() {
 
     const updateActiveChatMessages = (nextMessages) => {
         setMessages(nextMessages)
-        // setChats((prev) =>
-        //     prev.map((c) =>
-        //         c.id === activeChatId ? { ...c, messages: nextMessages, updatedAt: new Date().toISOString() } : c,
-        //     ),
-        // )
     }
 
     const ensureActiveChat = () => {
@@ -125,129 +138,106 @@ export function ChatInterface() {
                 },
             ],
         }
-        //setChats((prev) => [newChat, ...prev])
         setActiveChatId(id)
         setMessages(newChat.messages)
         return id
     }
 
+
     const newWebSocketChat = (messageToSend) => {
-        console.log(WebSocket.OPEN, WebSocket.CONNECTING)
-        try {
-            console.log(newSocketRef)
-            if (newSocketRef.current?.readyState == WebSocket.OPEN) {
-                newSocketRef.current.send(messageToSend.message)
+        const payload2 = {
+            ...payload,
+            question: messageToSend.message
+        };
+
+        const next = [...messages, messageToSend];
+        updateActiveChatMessages(next);
+        setInput("");
+        setIsLoading(true);
+        setSelectedFile(null);
+
+        const aiMessageId = (Date.now() + 1).toString();
+
+        console.log(payload2, "knjhgcfgc")
+
+        const sendPayload = () => {
+            if (newSocketRef.current?.readyState === WebSocket.OPEN) {
+                newSocketRef.current.send(JSON.stringify(payload2));
+            } else {
+                console.warn("WebSocket not ready");
             }
-            else if (newSocketRef.current?.readyState == WebSocket.CONNECTING) {
-                console.log("second timeeeeeeeeee of new websocket")
-                newSocketRef.current.onopen = () => {
-                    newSocketRef.current.send(messageToSend.message)
-                }
-            }
-            else {
-                console.warn('new WebSocket not ready to send')
-                newSocketRef.current = new WebSocket(`${newwebsocketurl}/?token=${localStorage.getItem("token")}`)
-                newSocketRef.current.onopen = () => {
-                    newSocketRef.current.send(messageToSend.message)
-                }
-            }
+        };
 
-            const next = [...messages, messageToSend]
-            updateActiveChatMessages(next)
-            setInput("")
-            setIsLoading(true)
-            setSelectedFile(null)
+        if (!newSocketRef.current || newSocketRef.current.readyState >= WebSocket.CLOSING) {
+            newSocketRef.current = new WebSocket(`${newwebsocketurl}/?token=${localStorage.getItem("token")}`);
+            newSocketRef.current.onopen = sendPayload;
+        } else if (newSocketRef.current.readyState === WebSocket.CONNECTING) {
+            newSocketRef.current.onopen = sendPayload;
+        } else {
+            sendPayload();
+        }
 
+        let fullResponse = "";
 
-            newSocketRef.current.onmessage = async (event) => {
-                const responseText = event.data
-                console.log('💬 Bot:', responseText)
-                const parsedMessage = JSON.parse(responseText);
-                console.log('💬 Bot:', parsedMessage)
+        newSocketRef.current.onmessage = async (event) => {
+            const parsedMessage = JSON.parse(event.data);
+            const chunk = parsedMessage.data_chunks || "";
+            const isDone = parsedMessage.is_done;
 
-                const attachLine =
-                    messageToSend.attachments && messageToSend.attachments.length
-                        ? ` Attached file: ${messageToSend.attachments[0].name}.`
-                        : ""
-                const aiMessage = {
-                    id: (Date.now() + 1).toString(),
-                    content:
-                        `Got it. ` +
-                        `Here's how I can help with "${messageToSend.content || "your attachment"}": I can draft emails, outline tasks, and summarize documents.${attachLine} Tell me which to do first.`,
-                    role: "assistant",
-                    timestamp: new Date(),
-                }
-                updateActiveChatMessages([...next, aiMessage])
-                setIsLoading(false)
+            fullResponse += chunk;
+
+            const updatedMessages = [...next];
+            const existingIndex = updatedMessages.findIndex((m) => m.id === aiMessageId);
+
+            const newAssistantMessage = {
+                id: aiMessageId,
+                content: fullResponse,
+                role: "assistant",
+                timestamp: new Date(),
+            };
+
+            if (existingIndex !== -1) {
+                updatedMessages[existingIndex] = newAssistantMessage;
+            } else {
+                updatedMessages.push(newAssistantMessage);
             }
 
-        } catch (err) {
-            console.error('Failed to send message to second socket:', err)
+            updateActiveChatMessages(updatedMessages);
+
+
+            setIsLoading(false);
+        };
+
+        if (payload.conversation_type === "new") {
+            removeData()
+        }
+        setPayload({})
+
+        newSocketRef.current.onerror = (err) => {
+            console.error("WebSocket error:", err);
+            setIsLoading(false);
+            setPayload({})
+        };
+    };
+
+    const removeData = async () => {
+        if (payload.conversation_type === "new") {
+            setPayload({})
+            setHistoryChatsStatus(true)
+            setTimeout(() => {
+                fecthHistoryChats()
+            }, 900)
+            setHistoryChatsStatus(false)
         }
     }
-    const existingWebSocketChat = (messageToSend) => {
-        console.log(WebSocket.OPEN, WebSocket.CONNECTING)
-        try {
-            console.log(existingSocketRef)
-            if (existingSocketRef.current?.readyState == WebSocket.OPEN) {
-                existingSocketRef.current.send(messageToSend)
-            }
-            else if (existingSocketRef.current?.readyState == WebSocket.CONNECTING) {
-                console.log("second timeeeeeeeeee")
-                existingSocketRef.current.onopen = () => {
-                    existingSocketRef.current.send(messageToSend)
-                }
-            }
-            else {
-                console.warn('Second WebSocket not ready to send')
-                existingSocketRef.current = new WebSocket(`${websocketurl}/${activeChatId}?token=${localStorage.getItem("token")}`)
-                existingSocketRef.current.onopen = () => {
-                    existingSocketRef.current.send(messageToSend)
-                }
-            }
-
-            const next = [...messages, messageToSend]
-            updateActiveChatMessages(next)
-            setInput("")
-            setIsLoading(true)
-            setSelectedFile(null)
-
-
-            existingSocketRef.current.onmessage = async (event) => {
-                const responseText = event.data
-                console.log('💬 Bot:', responseText)
-                const parsedMessage = JSON.parse(responseText);
-                console.log('💬 Bot:', parsedMessage)
-
-                const attachLine =
-                    messageToSend.attachments && messageToSend.attachments.length
-                        ? ` Attached file: ${messageToSend.attachments[0].name}.`
-                        : ""
-                const aiMessage = {
-                    id: (Date.now() + 1).toString(),
-                    content:
-                        `Got it. ` +
-                        `Here's how I can help with "${messageToSend.content || "your attachment"}": I can draft emails, outline tasks, and summarize documents.${attachLine} Tell me which to do first.`,
-                    role: "assistant",
-                    timestamp: new Date(),
-                }
-                updateActiveChatMessages([...next, aiMessage])
-                setIsLoading(false)
-            }
-
-        } catch (err) {
-            console.error('Failed to send message to second socket:', err)
-        }
-    }
-
 
     const handleSend = async () => {
         const trimmed = input.trim()
         if (!trimmed && !selectedFile) return
 
         const userMessage = {
-            id: Date.now().toString(),
-            message:trimmed,
+            id: uuidv4(),
+            message: trimmed,
             content: trimmed || (selectedFile ? "(sent an attachment)" : ""),
             role: "user",
             timestamp: new Date(),
@@ -261,38 +251,12 @@ export function ChatInterface() {
                 ]
                 : [],
         }
-        // if (activeChatId) {
-        //     existingWebSocketChat(userMessage)
-        // } else {
-        // }
-        newWebSocketChat(userMessage)
-
-
-        const next = [...messages, userMessage]
-        updateActiveChatMessages(next)
-        setInput("")
-        setIsLoading(true)
-
-        // clear file chip after enqueue
-        setSelectedFile(null)
-
-        // Simulated AI response
-        setTimeout(() => {
-            const attachLine =
-                userMessage.attachments && userMessage.attachments.length
-                    ? ` Attached file: ${userMessage.attachments[0].name}.`
-                    : ""
-            const aiMessage = {
-                id: (Date.now() + 1).toString(),
-                content:
-                    `Got it. ` +
-                    `Here's how I can help with "${userMessage.content || "your attachment"}": I can draft emails, outline tasks, and summarize documents.${attachLine} Tell me which to do first.`,
-                role: "assistant",
-                timestamp: new Date(),
-            }
-            updateActiveChatMessages([...next, aiMessage])
-            setIsLoading(false)
-        }, 900)
+        setPayload((prev) => ({ ...prev, question: userMessage.message }))
+        if (activeChatId) {
+            newWebSocketChat(userMessage)
+        } else {
+            newWebSocketChat(userMessage)
+        }
     }
 
     const handleKeyDown = (e) => {
@@ -302,8 +266,10 @@ export function ChatInterface() {
         }
     }
 
-    const clearChat = () => {
+    const clearChat = async () => {
         const id = ensureActiveChat()
+        await handleDeleteChats()
+        setActiveChatId(null)
         const reset = [
             {
                 id: "seed",
@@ -315,8 +281,6 @@ export function ChatInterface() {
         updateActiveChatMessages(reset)
         setMessages([])
         setChats([])
-        // also rename to "New chat"
-        //setChats((prev) => prev.map((c) => (c.id === id ? { ...c, name: "New chat" } : c)))
     }
 
     const newChat = () => {
@@ -326,32 +290,40 @@ export function ChatInterface() {
             role: "assistant",
             timestamp: new Date(),
         }])
+        setPayload({
+            conversation_id: uuidv4(),
+            conversation_type: "new"
+        })
+        setActiveChatId(null)
     }
 
-    const deleteChat = (id) => {
-        //setChats((prev) => prev.filter((c) => c.id !== id))
+    const deleteChat = async (id) => {
         console.log(id, "jhjgf")
+        await handleDeleteChats(`?conversation_id=${id}`)
         const remaining = chats.filter((c) => c.conversation_id !== id)
-        if (activeChatId === id) {
+        if (activeChatId === id || remaining?.length === 0) {
             setActiveChatId(null)
-            setMessages([
-                {
-                    id: "seed",
-                    content: "New chat started. Share your goal or paste content to summarize.",
-                    role: "assistant",
-                    timestamp: new Date(),
-                },
-            ])
+            setMessages([])
         }
         setChats(remaining)
     }
 
-    const renameChat = (id, name) => {
-        setChats((prev) => prev.map((c) => (c.id === id ? { ...c, name } : c)))
+
+
+    const handleSelectChat = async (id) => {
+        setActiveChatId(id)
+        setPayload({
+            conversation_id: id,
+            conversation_type: "existing"
+        })
+        setMessagesStatus(true)
+        await fecthHistoryChats(`?conversation_id=${id}`)
+        setMessagesStatus(false)
     }
 
     const handleFileButton = () => fileInputRef.current?.click()
     const onFileChange = async (e) => {
+        setUploadingStatus(true)
         const file = e.target.files?.[0]
         if (file) {
             try {
@@ -359,9 +331,12 @@ export function ChatInterface() {
                 payload.append("file_type", "pdf")
                 payload.append("document", file)
                 const response = await summarizeFiles(payload)
+                fileInputRef.current.value = ""
                 setSelectedFile(file)
             } catch (error) {
                 console.log(error)
+            } finally {
+                setUploadingStatus(false)
             }
         }
     }
@@ -387,7 +362,7 @@ export function ChatInterface() {
                     backgroundImage: "linear-gradient(180deg, rgba(69,87,147,0.05), rgba(255,255,255,0.9))",
                 }}
             >
-                <aside
+                {historyStatus && <aside
                     className="hidden md:flex md:w-72 h-full lg:w-80 flex-col border-r rounded-l-xl"
                     style={{ borderColor: BRAND.border, backgroundColor: BRAND.white }}
                     aria-label="Chat history and controls"
@@ -428,21 +403,19 @@ export function ChatInterface() {
                                     No chats found
                                 </p>
                             ) : (
-                                <ul className="space-y-2">
+                                historyChatsStatus ? <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                                    <div className="h-4 w-1/3 animate-pulse rounded bg-slate-100" />
+                                    <div className="mt-3 h-3 w-full animate-pulse rounded bg-slate-100" />
+                                    <div className="mt-2 h-3 w-2/3 animate-pulse rounded bg-slate-100" />
+                                </div> : <ul className="space-y-2">
                                     {filteredChats?.length > 0 && filteredChats.map((c) => {
                                         const isActive = c.conversation_id === activeChatId
                                         return (
                                             <li key={c.conversation_id}>
-                                                <button
-                                                    onClick={() => {
-                                                        setActiveChatId(c.conversation_id)
-                                                        setMessages([{
-                                                            id: crypto.randomUUID(),
-                                                            content: "Hello! I’m your Coretac.AI assistant. How can I help with email automation, tasks, or research today?",
-                                                            role: "assistant",
-                                                            timestamp: new Date(),
-                                                        },])
-                                                    }}
+                                                <div
+                                                    onClick={() =>
+                                                        handleSelectChat(c.conversation_id)
+                                                    }
                                                     className="w-full text-left px-3 py-2 rounded-lg flex items-center gap-3"
                                                     style={{
                                                         backgroundColor: isActive ? "rgba(69,87,147,0.08)" : BRAND.white,
@@ -467,7 +440,7 @@ export function ChatInterface() {
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
-                                                </button>
+                                                </div>
                                             </li>
                                         )
                                     })}
@@ -490,13 +463,17 @@ export function ChatInterface() {
                             </button>
                         </div>}
                     </div>
-                </aside>
+                </aside>}
 
                 <main className="flex-1 flex flex-col">
+
                     <div
                         className="px-4 py-3 border-b rounded-tr-xl rounded- flex items-center gap-3"
                         style={{ borderColor: BRAND.border, backgroundColor: BRAND.white }}
                     >
+                        <div onClick={() => setHistoryStatus(!historyStatus)} className="cursor-pointer">
+                            <GiHamburgerMenu color="#313c61" />
+                        </div>
                         <div
                             className="w-8 h-8 rounded-lg flex justify-center items-center"
                             style={{ backgroundColor: "rgba(69,87,147,0.10)" }}
@@ -514,7 +491,7 @@ export function ChatInterface() {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {messagesStatus ? <Loader /> : messages?.length > 0 ? <div className="flex-1 overflow-y-auto p-4 space-y-4">
                         {messages.map((m) => {
                             const isUser = m.role === "user"
                             return (
@@ -628,9 +605,28 @@ export function ChatInterface() {
                         )}
 
                         <div ref={messagesEndRef} />
+                    </div> : <div className="flex flex-col items-center justify-center h-full text-center text-sm text-gray-500">
+                        <div className="flex flex-col items-center space-y-4">
+                            <div className="p-4 bg-gray-100 rounded-full">
+                                <Bot className="w-12 h-12 text-[#475A90]" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-700">Start a conversation</h2>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Ask me anything or upload a document to get started.
+                                </p>
+                            </div>
+                            <button
+                                onClick={newChat}
+                                className="px-4 py-2 text-sm font-medium text-white bg-[#475A90] cursor-pointer rounded-md hover:bg-[#4a61a1] transition"
+                            >
+                                Start typing...
+                            </button>
+                        </div>
                     </div>
+                    }
 
-                    <div className="p-4 border-t rounded-br-xl" style={{ borderColor: BRAND.border, backgroundColor: BRAND.white }}>
+                    {messages?.length > 0 && <div className="p-4 border-t rounded-br-xl" style={{ borderColor: BRAND.border, backgroundColor: BRAND.white }}>
                         {selectedFile && (
                             <div className="mb-2 flex items-center gap-2">
                                 <div
@@ -662,7 +658,7 @@ export function ChatInterface() {
                                     aria-label="Attach file"
                                     onClick={handleFileButton}
                                 >
-                                    <Paperclip className="w-4 h-4" />
+                                    {uploadingStatus ? <span className="spinner" /> : <Paperclip className="w-4 h-4" />}
                                 </button>
                             </div>
 
@@ -699,9 +695,9 @@ export function ChatInterface() {
                                 <span className="text-sm">Send</span>
                             </button>
                         </div>
-                    </div>
+                    </div>}
                 </main>
             </div>
-        </div>
+        </div >
     )
 }

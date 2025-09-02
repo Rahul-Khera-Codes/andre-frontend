@@ -15,9 +15,19 @@ export const summarizeFiles = async (payload) => {
     }
 };
 
-export const getSummarizeFiles = async () => {
+export const getChatHistory = async (payload="") => {
     try {
-        const response = await axiosInstance.get(`/microsoft/summarize/`);
+        const response = await axiosInstance.get(`/microsoft/ai/chatbot/history/${payload}`);
+        return response;
+    } catch (error) {
+        console.error(error);
+        return error;
+    }
+};
+
+export const deleteChatHistory = async (payload="") => {
+    try {
+        const response = await axiosInstance.delete(`/microsoft/ai/chatbot/history/${payload}`);
         return response;
     } catch (error) {
         console.error(error);

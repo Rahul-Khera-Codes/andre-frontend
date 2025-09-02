@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 import Loader from "../../components/loader"
 import Header from "../../components/Header"
-import { getSummarizeFiles, summarizeFiles } from "../../apis/fileupload"
+import { summarizeFiles } from "../../apis/fileupload"
 
 
 function KindIcon({ kind }) {
@@ -148,22 +148,22 @@ export default function FilesPage() {
         // fetchSummarizeData()
     }, [])
 
-    const fetchSummarizeData = async () => {
-        setIsLoading(true)
-        try {
-            const response = await getSummarizeFiles();
-            console.log(response)
-            if (response?.status === 200) {
-                setData(response?.data)
-            } else {
-                setIsLoading(false)
-            }
+    // const fetchSummarizeData = async () => {
+    //     setIsLoading(true)
+    //     try {
+    //         const response = await getSummarizeFiles();
+    //         console.log(response)
+    //         if (response?.status === 200) {
+    //             setData(response?.data)
+    //         } else {
+    //             setIsLoading(false)
+    //         }
 
-        } catch (error) {
-            console.log(error)
-            setIsLoading(false)
-        }
-    }
+    //     } catch (error) {
+    //         console.log(error)
+    //         setIsLoading(false)
+    //     }
+    // }
 
     async function uploadFile(file) {
         setError(null)
