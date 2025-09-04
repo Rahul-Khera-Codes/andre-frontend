@@ -11,6 +11,7 @@ import {
   MessageCircle,
   File,
 } from "lucide-react"
+import { TbBrandGoogleDrive } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router-dom"
 
 const navigationItems = [
@@ -24,6 +25,7 @@ const navigationItems = [
   // { icon: Archive, label: "Archive", href: "#" },
   // { icon: Shield, label: "Security", href: "#" },
   { icon: MessageCircle, label: "Chat App", href: "chat" },
+  { icon: TbBrandGoogleDrive, label: "Drive", href: "drive" },
   // { icon: Settings, label: "Settings", href: "settings" },
 ]
 

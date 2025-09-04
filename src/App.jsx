@@ -9,6 +9,7 @@ import CalendarManagement from './pages/dashboard/CalendarIntegration'
 import Chat from './pages/dashboard/Chat'
 import TeamsLogin from './pages/TeamsLogin'
 import FilesPage from './pages/dashboard/FileUpload'
+import Drive from './pages/dashboard/Drive'
 
 function App() {
 
@@ -24,6 +25,7 @@ function App() {
           <Route path='calendar-management' element={<CalendarManagement />} />
           <Route path='chat' element={<Chat />} />
           <Route path='upload-file' element={<FilesPage />} />
+          <Route path='drive' element={<Drive />} />
         </Route>
       </Routes>
     </div>

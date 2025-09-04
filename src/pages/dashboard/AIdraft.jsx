@@ -430,6 +430,18 @@ function AIDraftReview() {
                     <FaReply size={20} color="purple" />
                     <h3 className="text-lg font-bold text-purple-800">Reply</h3>
                   </div>
+                  <ul className="text-sm flex text-gray-600 font-bold">
+                    bcc:
+                    {selectedDraft?.bcc_recipients.map((e) => (
+                      <li className="font-medium px-1">{e}</li>
+                    ))}
+                  </ul>
+                  <ul className="text-sm flex items-center text-gray-600 font-bold py-1">
+                    cc:
+                    {selectedDraft?.cc_recipients.map((e) => (
+                      <li className="font-medium px-1">{e}</li>
+                    ))}
+                  </ul>
 
                   <textarea
                     value={htmlToPlainText(selectedDraft.reply)}
