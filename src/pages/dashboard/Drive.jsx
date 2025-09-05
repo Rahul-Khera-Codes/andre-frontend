@@ -17,6 +17,7 @@ import {
     Code,
     MoreVertical,
     BrushCleaning,
+    DownloadCloudIcon,
 } from "lucide-react"
 import Header from "../../components/Header"
 import CustomInputField from "../../components/CustomInputField"
@@ -25,7 +26,8 @@ import Loader from "../../components/loader"
 
 function Drive() {
     const [files, setFiles] = useState([])
-    const [currentPath, setCurrentPath] = useState("/")
+    const [currentPath, setCurrentPath] = useState({ key: "", label: "Home" })
+    const [fullPath, setFullPath] = useState([{ key: "", label: "Home " }])
     const [viewMode, setViewMode] = useState("grid")
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedFiles, setSelectedFiles] = useState([])
@@ -36,13 +38,12 @@ function Drive() {
 
     useEffect(() => {
         fetchFiles()
-    }, [currentPath])
+    }, [])
 
-    const fetchFiles = async () => {
+    const fetchFiles = async (path = "") => {
         try {
             setLoading(true)
-            const response = await getDriveLists();
-            console.log(response?.data)
+            const response = await getDriveLists(path);
             if (response?.status === 200) {
                 const customResponse = response?.data?.value.map((e) => {
                     let type = "file";
@@ -168,6 +169,24 @@ function Drive() {
             console.error("Failed to delete files:", error)
         }
     }
+
+    const handleDirectory = async (id, name) => {
+        await fetchFiles(id ? `?folder_id=${id}` : ``)
+        const index = fullPath.findIndex((e) => e.key === id)
+        const filterPath = fullPath.splice(0, index + 1)
+        setFullPath(filterPath)
+        setCurrentPath({ key: id, label: name })
+    }
+
+    const handleDownload = (url, name) => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', name);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const getFileIcon = (type) => {
         const iconProps = { size: 20, className: "text-white" }
 
@@ -254,9 +273,9 @@ function Drive() {
                     </div>
                 </div>
             </div>
-            {selectedFiles.length > 0 && <div className="bg-white/60 backdrop-blur-sm border-b border-slate-200">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-                    <div className="flex justify-between items-center">
+                    {selectedFiles.length > 0 && <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-3">
                             <button
                                 onClick={() => setSelectedFiles([])}
@@ -276,9 +295,14 @@ function Drive() {
                                 <span>Delete</span>
                             </button>
                         </div>
-                    </div>
+                    </div>}
+                    <ul className="flex gap-[4px]">
+                        {fullPath.map(e => (
+                            <li className={`cursor-pointer text-black ${e.key !== currentPath.key && 'text-gray-400'}`} onClick={() => handleDirectory(e.key, e.label)}> / {e.label}</li>
+                        ))}
+                    </ul>
                 </div>
-            </div>}
+            </div>
             {showNewFolder && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
@@ -341,25 +365,42 @@ function Drive() {
                                     ? "bg-white rounded-xl p-4 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer"
                                     : "bg-white rounded-lg p-3 border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer flex items-center space-x-3"
                                     }`}
+                                onClick={async () => {
+                                    await fetchFiles(`?folder_id=${file.id}`)
+                                    setFullPath((prev) => ([
+                                        ...prev, { key: file.id, label: `${file.name} ` }
+                                    ]))
+                                    setCurrentPath({ key: file.id, label: file.name })
+                                }}
                             >
-                                <input
-                                    type="checkbox"
-                                    checked={selectedFiles.includes(file.id)}
-                                    onChange={(e) => {
-                                        e.stopPropagation()
-                                        if (e.target.checked) {
-                                            setSelectedFiles([...selectedFiles, file.id])
-                                        } else {
-                                            setSelectedFiles(selectedFiles.filter((id) => id !== file.id))
-                                        }
-                                    }}
-                                    className="absolute top-2 accent-[#374A8C] w-4 h-4 right-2 z-10"
-                                />
+                                <>
+                                    {file.url && <div className={`absolute ${viewMode === "grid" ? 'top-2' : 'top-8 right-1'}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDownload(file.url, file.name)
+
+                                        }}>
+                                        <DownloadCloudIcon color="#717a9f" size={20} />
+                                    </div>}
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedFiles.includes(file.id)}
+                                        onChange={(e) => {
+                                            e.stopPropagation();
+                                            // if (e.target.checked) {
+                                            //     setSelectedFiles([...selectedFiles, file.id])
+                                            // } else {
+                                            //     setSelectedFiles(selectedFiles.filter((id) => id !== file.id))
+                                            // }
+                                        }}
+                                        className="absolute top-2 accent-[#374A8C] w-4 h-4 right-2 z-10"
+                                    />
+                                </>
 
                                 {viewMode === "grid" ? (
                                     <>
                                         <div
-                                            className={`w-12 h-12 rounded-lg flex items-center justify-center mb-3 ${getFileTypeColor(file.type)}`}
+                                            className={`w-12 h-12 rounded-lg mx-auto flex items-center justify-center mb-3 ${getFileTypeColor(file.type)}`}
                                         >
                                             {getFileIcon(file.type)}
                                         </div>
@@ -385,9 +426,6 @@ function Drive() {
                                                 {file.type === "folder" ? "Folder" : file.size} • {file.modified}
                                             </p>
                                         </div>
-                                        <button className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-slate-600 transition-all">
-                                            <MoreVertical size={16} />
-                                        </button>
                                     </>
                                 )}
                             </div>
