@@ -447,10 +447,10 @@ function AIDraftReview() {
                       <li className="font-medium px-1">{e}</li>
                     ))}
                   </ul>
-                  <ul className="text-sm flex items-center text-gray-600 font-bold py-1">
+                  <ul className="text-sm flex gap-1 items-center text-gray-600 font-bold py-1">
                     cc:
                     {selectedDraft?.cc_recipients.map((e) => (
-                      <li className="font-medium px-1">{e}</li>
+                      <li className="font-medium px-2 border border-gray-600 bg-white rounded-full">{e}</li>
                     ))}
                   </ul>
 
