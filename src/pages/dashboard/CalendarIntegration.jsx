@@ -136,9 +136,15 @@ function CalendarManagement() {
       const response = await getCalandarEvents()
       const mails = response?.data
       console.log(mails)
-      if (mails?.length > 0 && mails?.[0]?.event_id) {
-        setCalendarEvents(mails)
-      } else {
+      if (response?.status === 200) {
+        if (mails?.length > 0 && mails?.[0]?.event_id) {
+          setCalendarEvents(mails)
+        } else {
+          setCalendarEvents([])
+          setLoading(false)
+        }
+      }
+      else {
         setCalendarEvents([])
         setLoading(false)
         setMessage(response?.response?.data?.error ?? response?.message ?? "No Calendar Events Found")
