@@ -19,7 +19,7 @@ import {
 import { format } from "date-fns"
 import { SelectDropdown } from "../../components/CustomDropDown"
 import CustomDatePicker from "../../components/CustomCalendar"
-import { getCalandarEvents } from "../../apis/calendarIntegration"
+import { addCalandarEvents, getCalandarEvents, updateCalandarEvents } from "../../apis/calendarIntegration"
 import Loader from "../../components/loader"
 import Header from "../../components/Header"
 import CustomInputField from "../../components/CustomInputField"
@@ -74,18 +74,17 @@ function CalendarManagement() {
   const [message, setMessage] = useState("")
   const [calendarEvents, setCalendarEvents] = useState([])
   const [pageLoading, setPageLoading] = useState(true)
+  const [selectedEventId, setSelectedEventId] = useState("")
 
   const [filteredDrafts, setFilteredDrafts] = useState([])
   const [newReminder, setNewReminder] = useState({
-    title: "",
-    dueDate: new Date(),
-    description: "",
-    priority: "medium",
-    category: "research",
-    deliveryMethods: [],
-    recurring: false,
-    recurringPattern: "daily",
+    subject: "",
+    start: "",
+    end: "",
+    body: "",
+    location: "",
   })
+  const [updateReminder, setUpdateRemainder] = useState({})
 
   const toggleDeliveryMethod = (key) => {
     setNewReminder((prev) => ({
@@ -96,9 +95,19 @@ function CalendarManagement() {
     }))
   }
 
-  const handleCreateReminder = () => {
+  const handleCreateReminder = async () => {
     console.log("Reminder created:", newReminder)
-    setIsOpen(false)
+    try {
+      const response = selectedEventId ? await updateCalandarEvents(selectedEventId, updateReminder) : await addCalandarEvents(newReminder)
+      console.log(response)
+      if (response?.status === 201) {
+        setIsOpen(false)
+        fetchCalendarEvents()
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   useEffect(() => {
@@ -327,6 +336,17 @@ function CalendarManagement() {
               <div className="space-y-4 gap-2 grid md:grid-cols-2">
                 {filteredDrafts.map((email) => (
                   <div
+                    onClick={() => {
+                      setNewReminder({
+                        subject: email.subject,
+                        start: email.start.dateTime,
+                        end: email.end.dateTime,
+                        body: email.body.content,
+                        location: email.location.displayName,
+                      })
+                      setSelectedEventId(email.event_id)
+                      setIsOpen(true)
+                    }}
                     key={email.event_id}
                     className={`bg-gradient-to-br flex flex-col gap-2 from-white to-gray-50 border-2 border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:border-purple-300 transition-all duration-300 cursor-pointer transform hover:-translate-y-1
                   `}
@@ -375,131 +395,93 @@ function CalendarManagement() {
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 backdrop-blur-sm">
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl w-full max-h-[90vh] overflow-auto max-w-2xl p-8 space-y-6 border border-gray-200">
               <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Create New Reminder
+                {(newReminder?.start) ? 'Update' : 'Create'} New Reminder
+              </div>
+
+              <div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">Subject</label>
+                  <input
+                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200"
+                    value={newReminder.subject}
+                    onChange={(e) => {
+                      setNewReminder((prev) => ({ ...prev, subject: e.target.value }))
+                      setUpdateRemainder((prev) => ({ ...prev, subject: e.target.value }))
+                    }}
+                    placeholder="Reminder subject..."
+                  />
+                </div>
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">Title</label>
+                  <label className="block text-sm font-semibold text-gray-700">Start Date & Time</label>
                   <input
+                    type="datetime-local"
                     className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200"
-                    value={newReminder.title}
-                    onChange={(e) => setNewReminder((prev) => ({ ...prev, title: e.target.value }))}
-                    placeholder="Reminder title..."
+                    value={newReminder.start ? new Date(newReminder.start).toISOString().slice(0, 16) : ""}
+                    onChange={(e) => {
+                      const localEnd = e.target.value;
+                      const utcStart = new Date(localEnd).toISOString();
+                      setNewReminder((prev) => ({ ...prev, start: utcStart }))
+                      setUpdateRemainder((prev) => ({ ...prev, start: utcStart }))
+                    }}
                   />
                 </div>
                 <div className="space-y-2 pt-1">
-                  <CustomDatePicker
-                    value={newReminder.dueDate}
-                    onChange={(updated) => {
-                      setNewReminder((prev) => ({ ...prev, dueDate: updated }))
+                  <label className="block text-sm font-semibold text-gray-700">End Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200"
+                    value={newReminder.end ? new Date(newReminder.end).toISOString().slice(0, 16) : ""}
+                    onChange={(e) => {
+                      const localEnd = e.target.value;
+                      const utcEnd = new Date(localEnd).toISOString();
+                      setNewReminder((prev) => ({ ...prev, end: utcEnd }))
+                      setUpdateRemainder((prev) => ({ ...prev, end: utcEnd }))
                     }}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">Description</label>
+                <label className="block text-sm font-semibold text-gray-700">Body</label>
                 <textarea
                   rows={3}
                   className="w-full rounded-xl border-2 border-gray-200 focus:outline-none resize-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 px-4 py-3 transition-all duration-200"
-                  value={newReminder.description}
-                  onChange={(e) => setNewReminder((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder="Detailed description of the reminder..."
+                  value={newReminder.body}
+                  onChange={(e) => {
+                    setNewReminder((prev) => ({ ...prev, body: e.target.value }))
+                    setUpdateRemainder((prev) => ({ ...prev, body: e.target.value }))
+                  }}
+                  placeholder="Detailed body of the reminder..."
                 />
               </div>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">Priority</label>
-                  <SelectDropdown
-                    name="priority"
-                    options={[
-                      { label: "High", key: "high" },
-                      { label: "Medium", key: "medium" },
-                      { label: "Low", key: "low" },
-                    ]}
-                    value={newReminder.priority}
-                    onChange={(updated) => {
-                      setNewReminder((prev) => ({ ...prev, priority: updated }))
-                    }}
-                    placeholder="Select"
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">Category</label>
-                  <SelectDropdown
-                    name="category"
-                    options={[
-                      { label: "Research", key: "research" },
-                      { label: "Regulatory", key: "regulatory" },
-                      { label: "Administrative", key: "administrative" },
-                      { label: "Clinical", key: "clinical" },
-                    ]}
-                    value={newReminder.category}
-                    onChange={(updated) => {
-                      setNewReminder((prev) => ({ ...prev, category: updated }))
-                    }}
-                    placeholder="Select"
-                    className="w-full"
-                  />
-                </div>
-              </div>
-              <div className="space-y-4">
-                <label className="block text-sm font-semibold text-gray-700">Delivery Methods</label>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { key: "email", label: "Email", icon: Mail, color: "from-blue-500 to-blue-600" },
-                    { key: "in-app", label: "In-App", icon: Bell, color: "from-purple-500 to-purple-600" },
-                    { key: "teams", label: "Teams", icon: Users, color: "from-green-500 to-green-600" },
-                    { key: "slack", label: "Slack", icon: MessageSquare, color: "from-pink-500 to-pink-600" },
-                  ].map(({ key, label, icon: Icon, color }) => (
-                    <label
-                      key={key}
-                      className="flex items-center space-x-3 cursor-pointer p-3 rounded-xl hover:bg-gray-50 transition-colors duration-200"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={newReminder.deliveryMethods.includes(key)}
-                        onChange={() => toggleDeliveryMethod(key)}
-                        className="w-5 h-5 accent-purple-600 rounded"
-                      />
-                      <div className={`bg-gradient-to-r ${color} p-2 rounded-lg`}>
-                        <Icon className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-medium text-gray-700">{label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">Location</label>
                 <input
-                  className="accent-purple-600 w-5 h-5"
-                  type="checkbox"
-                  checked={newReminder.recurring}
-                  onChange={(e) => setNewReminder((prev) => ({ ...prev, recurring: e.target.checked }))}
+                  className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200"
+                  value={newReminder.location}
+                  onChange={(e) => {
+                    setNewReminder((prev) => ({ ...prev, location: e.target.value }))
+                    setUpdateRemainder((prev) => ({ ...prev, location: e.target.value }))
+                  }}
+                  placeholder="Location for the reminder..."
                 />
-                <span className="font-medium text-gray-700">Recurring reminder</span>
-                {newReminder.recurring && (
-                  <SelectDropdown
-                    name="recurring"
-                    options={[
-                      { label: "Daily", key: "daily" },
-                      { label: "Weekly", key: "weekly" },
-                      { label: "Monthly", key: "monthly" },
-                      { label: "Yearly", key: "yearly" },
-                    ]}
-                    value={newReminder.recurringPattern}
-                    onChange={(updated) => {
-                      setNewReminder((prev) => ({ ...prev, recurringPattern: updated }))
-                    }}
-                    placeholder="Select"
-                    className="w-[110px]"
-                  />
-                )}
               </div>
               <div className="flex justify-end gap-4 pt-4">
                 <button
                   className="px-6 py-3 border-2 border-gray-300 cursor-pointer rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false)
+                    setNewReminder({
+                      subject: "",
+                      start: "",
+                      end: "",
+                      body: "",
+                      location: "",
+                    })
+                    setUpdateRemainder({})
+                    setSelectedEventId("")
+                  }}
                 >
                   Cancel
                 </button>
@@ -507,7 +489,7 @@ function CalendarManagement() {
                   className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 cursor-pointer text-white rounded-xl font-medium hover:from-emerald-600 hover:to-teal-600 shadow-lg transform hover:scale-105 transition-all duration-200"
                   onClick={handleCreateReminder}
                 >
-                  Create Reminder
+                  {(newReminder?.start) ? 'Update' : 'Create'} Reminder
                 </button>
               </div>
             </div>

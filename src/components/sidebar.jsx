@@ -67,13 +67,13 @@ function Sidebar({ openSidebar, showSidebar, setShowSidebar }) {
                 showSidebar && setShowSidebar(false)
 
               }}
-              className={`relative flex items-center w-full h-11 ${openSidebar ? 'px-3' : 'justify-center'} cursor-pointer rounded-t-md transition
+              className={`relative flex items-center w-full h-11 ${(openSidebar || showSidebar) ? 'px-3' : 'justify-center'} cursor-pointer rounded-t-md transition
   ${currentPath() === item.href
                   ? 'bg-slate-200 after:content-[""] after:absolute after:bottom-0 after:left-0 after:rounded-b-md after:w-full after:h-[2px] after:bg-gradient-to-r after:from-[#374A8C] after:to-[#73B1DE]'
                   : 'hover:bg-slate-100'}`}
             >
-              <item.icon className={`w-5 h-5 ${openSidebar && 'mr-3'} text-slate-700`} />
-              {openSidebar && <span className="flex-1 text-[15px] text-left text-slate-800">{item.label}</span>}
+              <item.icon className={`w-5 h-5 ${(openSidebar || showSidebar) && 'mr-3'} text-slate-700`} />
+              {(openSidebar || showSidebar) && <span className="flex-1 text-[15px] text-left text-slate-800">{item.label}</span>}
             </div>
           ))}
         </nav>
