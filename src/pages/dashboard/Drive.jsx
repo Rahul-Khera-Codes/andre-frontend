@@ -26,8 +26,8 @@ import Loader from "../../components/loader"
 
 function Drive() {
     const [files, setFiles] = useState([])
-    const [currentPath, setCurrentPath] = useState({ key: "", label: "Home" })
-    const [fullPath, setFullPath] = useState([{ key: "", label: "Home " }])
+    const [currentPath, setCurrentPath] = useState({})
+    const [fullPath, setFullPath] = useState([])
     const [viewMode, setViewMode] = useState("grid")
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedFiles, setSelectedFiles] = useState([])
@@ -38,6 +38,8 @@ function Drive() {
 
     useEffect(() => {
         fetchFiles()
+        setCurrentPath({ key: "", label: "Home" })
+        setFullPath([{ key: "", label: "Home " }])
     }, [])
 
     const fetchFiles = async (path = "") => {
@@ -296,11 +298,19 @@ function Drive() {
                             </button>
                         </div>
                     </div>}
-                    <ul className="flex gap-[4px]">
-                        {fullPath.map(e => (
-                            <li className={`cursor-pointer text-black ${e.key !== currentPath.key && 'text-gray-400'}`} onClick={() => handleDirectory(e.key, e.label)}> / {e.label}</li>
-                        ))}
-                    </ul>
+                    <div className="overflow-x-auto max-w-full">
+                        <ul className="flex gap-[4px] whitespace-nowrap">
+                            {fullPath.map((e) => (
+                                <li
+                                    key={e.key}
+                                    className={`cursor-pointer text-black ${e.key !== currentPath.key && 'text-gray-400'}`}
+                                    onClick={() => handleDirectory(e.key, e.label)}
+                                >
+                                    / {e.label}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             </div>
             {showNewFolder && (
