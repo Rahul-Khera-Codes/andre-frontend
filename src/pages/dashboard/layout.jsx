@@ -66,6 +66,21 @@ function Dashboard() {
         }
     }, [])
 
+    useEffect(() => {
+        function handleResize() {
+            if (window.innerWidth < 756 && showSidebar) {
+                setShowSidebar(true);
+            } else {
+                setShowSidebar(false);
+            }
+        }
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
+
     if (loading) return <Loader />
 
     return (
@@ -79,7 +94,7 @@ function Dashboard() {
                 <div className={`${openSidebar ? 'w-full md:w-[calc(100%-260px)]' : 'w-[calc(100%-80px)]'} h-full bg-[#f3fafa]`}><Outlet /></div>
             </div>
             {showSidebar && <div className="fixed w-full inset-0 bg-black/40 z-50 md:hidden block">
-                <Sidebar openSidebar={openSidebar} showSidebar={showSidebar} setShowSidebar={setShowSidebar}/>
+                <Sidebar openSidebar={openSidebar} showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
             </div>}
         </div>
     )
