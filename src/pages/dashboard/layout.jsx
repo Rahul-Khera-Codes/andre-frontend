@@ -11,6 +11,7 @@ import { getLoginStatusMsg } from '../../store/loginStatusMsgSlice'
 
 function Dashboard() {
     const [openSidebar, setOpenSidebar] = useState(true)
+    const [showSidebar, setShowSidebar] = useState(false)
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const path = useLocation();
@@ -69,14 +70,17 @@ function Dashboard() {
 
     return (
         <div className='h-full w-full'>
-            <div className='h-18 w-full'><Navbar /></div>
+            <div className='h-18 w-full'><Navbar setShowSidebar={setShowSidebar} /></div>
             <div className='h-[calc(100%-72px)] w-full flex'>
-                <div className={`${openSidebar ? 'w-65' : 'w-20'} relative h-full flex`}><Sidebar openSidebar={openSidebar} />
-                    <div className={`absolute right-[-18px] group cursor-pointer transition-transform duration-200 ${openSidebar ? "rotate-180" : "rotate-0"
-                        }`} onClick={handleClose}><div className="flex items-center gap-2"><div className='group-hover:hidden bg-[#93a7d7] rounded-full'><ChevronsRightIcon color='lightgray' /></div> <div className='hidden group-hover:block bg-[#425990] rounded-full'> <ChevronsRightIcon color='white'/></div></div></div>
+                <div className={`${openSidebar ? 'w-65' : 'w-20'} relative  h-full hidden md:flex`}><Sidebar openSidebar={openSidebar} showSidebar={showSidebar} />
+                    {!showSidebar && <div className={`absolute right-[-18px] group cursor-pointer transition-transform duration-200 ${openSidebar ? "rotate-180" : "rotate-0"
+                        }`} onClick={handleClose}><div className="flex items-center gap-2"><div className='group-hover:hidden bg-[#93a7d7] rounded-full'><ChevronsRightIcon color='lightgray' /></div> <div className='hidden group-hover:block bg-[#425990] rounded-full'> <ChevronsRightIcon color='white' /></div></div></div>}
                 </div>
-                <div className={`${openSidebar ? 'w-[calc(100%-260px)]' : 'w-[calc(100%-80px)]'} h-full bg-[#f3fafa]`}><Outlet /></div>
+                <div className={`${openSidebar ? 'w-full md:w-[calc(100%-260px)]' : 'w-[calc(100%-80px)]'} h-full bg-[#f3fafa]`}><Outlet /></div>
             </div>
+            {showSidebar && <div className="fixed w-full inset-0 bg-black/40 z-50 md:hidden block">
+                <Sidebar openSidebar={openSidebar} showSidebar={showSidebar} setShowSidebar={setShowSidebar}/>
+            </div>}
         </div>
     )
 }

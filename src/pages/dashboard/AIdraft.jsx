@@ -22,6 +22,8 @@ function AIDraftReview() {
   const [loading, setLoading] = useState(true)
   const [pageLoading, setPageLoading] = useState(true)
   const [message, setMessage] = useState("")
+  const [draftLoading, setDraftLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState("")
 
   const [filteredDrafts, setFilteredDrafts] = useState([])
 
@@ -182,17 +184,26 @@ function AIDraftReview() {
   }
 
   const handleDraft = async () => {
+    setErrorMsg("")
+    setDraftLoading(true)
     try {
       const payload = {
         filter: "draft",
         body: selectedDraft?.body_preview,
-        subject: "no",
-        to_recipients: ["test@gmail.com"]
+        subject: selectedDraft?.subject,
+        to_recipients: selectedDraft?.to_recipient_emails
       }
       const response = await draftAutomateEmails(payload);
       console.log(response)
+      if (response?.status === 201) {
+        setSelectedDraft({})
+      } else {
+        setErrorMsg(response?.response?.message || response?.message || "Internal Server Error")
+      }
     } catch (error) {
-
+      setErrorMsg(response?.response?.message || response?.message || "Internal Server Error")
+    } finally {
+      setDraftLoading(false)
     }
   }
 
@@ -255,9 +266,9 @@ function AIDraftReview() {
                       // className="flex flex-col p-4 gap-2 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200"
                       >
                         <div className="">
-                          <p className="font-semibold text-gray-800">{email?.subject}</p>
-                          <p className="text-sm text-gray-600">From: {email?.sender_email}</p>
-                          <p className="text-sm text-gray-600">To: {email?.to_recipient_emails?.[0]}</p>
+                          <p className="font-semibold text-gray-800 truncate">{email?.subject}</p>
+                          <p className="text-sm text-gray-600 truncate">From: {email?.sender_email}</p>
+                          <p className="text-sm text-gray-600 truncate">To: {email?.to_recipient_emails?.[0]}</p>
                         </div>
                         <div className="flex justify-between items-center gap-3">
                           <span
@@ -468,6 +479,8 @@ function AIDraftReview() {
                 </div>
               </div>
 
+              {errorMsg && <p className="text-red-500 p-3">{errorMsg}</p>}
+
               {!editMode && (
                 <div className="flex items-center gap-4 pt-6">
                   <button
@@ -483,7 +496,7 @@ function AIDraftReview() {
                     <CheckCircle2 className="w-5 h-5 mr-2" /> Approve
                   </button>
                   <button onClick={handleDraft} className="border-2 border-gray-300 px-4 py-2 rounded-xl flex items-center font-medium hover:bg-gray-50 transition-colors duration-200">
-                    <Mail className="w-5 h-5 mr-2" /> Save to Drafts
+                    <Mail className="w-5 h-5 mr-2" /> {draftLoading ? `Saving...` : `Save to Drafts`}
                   </button>
                 </div>
               )}

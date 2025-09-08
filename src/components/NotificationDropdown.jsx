@@ -70,7 +70,7 @@ function NotificationDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-gradient-to-br from-white to-blue-50 shadow-2xl border border-blue-200 rounded-2xl z-50 overflow-hidden">
+        <div className="sm:absolute fixed right-0 mt-2 sm:w-96 w-full bg-gradient-to-br from-white to-blue-50 shadow-2xl border border-blue-200 rounded-2xl z-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-blue-100 bg-gradient-to-r from-blue-500 to-cyan-500">
             <p className="font-semibold text-sm text-white flex items-center gap-2">
               <Bell className="w-4 h-4" />

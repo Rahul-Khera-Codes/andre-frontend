@@ -13,6 +13,8 @@ import {
 } from "lucide-react"
 import { TbBrandGoogleDrive } from "react-icons/tb";
 import { useLocation, useNavigate } from "react-router-dom"
+import logo from '../assets/logo.png'
+import { ImCancelCircle } from "react-icons/im";
 
 const navigationItems = [
   { icon: Mail, label: "Email Automation", count: 12, href: "ai-draft" },
@@ -29,7 +31,7 @@ const navigationItems = [
   // { icon: Settings, label: "Settings", href: "settings" },
 ]
 
-function Sidebar({ openSidebar }) {
+function Sidebar({ openSidebar, showSidebar, setShowSidebar }) {
   const navigate = useNavigate();
   const path = useLocation();
   function currentPath() {
@@ -39,17 +41,32 @@ function Sidebar({ openSidebar }) {
   }
 
   return (
-    <aside className="w-full h-full overflow-auto bg-white border-r border-slate-200">
+    <aside className={`h-full ${showSidebar ? 'fixed w-[250px] top-0' : 'w-full'} overflow-auto bg-white border-r border-slate-200`}>
       <div className={openSidebar ? 'p-4' : 'p-2'}>
-        {/* <p className="text-sm text-slate-600 mb-6">
-          Harnessing AI for Seamless Research Management
-        </p> */}
+        {showSidebar && <>
+
+          <div className="right-2 absolute mb-3">
+            <ImCancelCircle className="cursor-pointer" onClick={() => setShowSidebar(false)} />
+          </div>
+
+          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate("/dashboard")}>
+            <div className="w-45">
+              <img src={logo} alt="logo" className="object-cover" />
+            </div>
+          </div>
+          <hr className="mt-2 pb-2 text-slate-400" />
+        </>}
+
 
         <nav className="space-y-2">
           {navigationItems.map((item) => (
             <div
               key={item.label}
-              onClick={() => navigate(item.href)}
+              onClick={() => {
+                navigate(item.href)
+                showSidebar && setShowSidebar(false)
+
+              }}
               className={`relative flex items-center w-full h-11 ${openSidebar ? 'px-3' : 'justify-center'} cursor-pointer rounded-t-md transition
   ${currentPath() === item.href
                   ? 'bg-slate-200 after:content-[""] after:absolute after:bottom-0 after:left-0 after:rounded-b-md after:w-full after:h-[2px] after:bg-gradient-to-r after:from-[#374A8C] after:to-[#73B1DE]'

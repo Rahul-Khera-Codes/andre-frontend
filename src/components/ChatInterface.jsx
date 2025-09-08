@@ -372,7 +372,7 @@ export function ChatInterface() {
                 }}
             >
                 {historyStatus && <aside
-                    className="hidden md:flex md:w-72 h-full lg:w-80 flex-col border-r rounded-l-xl"
+                    className="flex md:w-72 h-full lg:w-80 flex-col border-r rounded-l-xl"
                     style={{ borderColor: BRAND.border, backgroundColor: BRAND.white }}
                     aria-label="Chat history and controls"
                 >
