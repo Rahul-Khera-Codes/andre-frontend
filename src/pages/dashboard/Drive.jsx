@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
     Upload,
     FolderPlus,
@@ -18,11 +18,17 @@ import {
     MoreVertical,
     BrushCleaning,
     DownloadCloudIcon,
+    MoreVerticalIcon,
 } from "lucide-react"
 import Header from "../../components/Header"
 import CustomInputField from "../../components/CustomInputField"
 import { getDriveLists } from "../../apis/drive"
 import Loader from "../../components/loader"
+import { MdOutlineFileDownload } from "react-icons/md"
+import { IoChatbubbleOutline } from "react-icons/io5"
+import { useNavigate } from "react-router-dom"
+import { useDispatch } from "react-redux"
+import { getDraftUrl } from '../../store/draftShareUrlSlice'
 
 function Drive() {
     const [files, setFiles] = useState([])
@@ -35,6 +41,10 @@ function Drive() {
     const [showNewFolder, setShowNewFolder] = useState(false)
     const [newFolderName, setNewFolderName] = useState("")
     const [loading, setLoading] = useState(true)
+    const [isOpen, setIsOpen] = useState("");
+    const menuRef = useRef(null);
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     useEffect(() => {
         fetchFiles()
@@ -102,6 +112,17 @@ function Drive() {
             setLoading(false)
         }
     }
+
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                //setIsOpen("");
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const handleFileUpload = async (event) => {
         const file = event.target.files?.[0]
@@ -384,15 +405,15 @@ function Drive() {
                                 }}
                             >
                                 <>
-                                    {file.url && <div className={`absolute ${viewMode === "grid" ? 'top-2' : 'top-8 right-1'}`}
+                                    {/* {file.url && <div className={`absolute ${viewMode === "grid" ? 'top-2' : 'top-8 right-1'}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             handleDownload(file.url, file.name)
 
                                         }}>
                                         <DownloadCloudIcon color="#717a9f" size={20} />
-                                    </div>}
-                                    <input
+                                    </div>} */}
+                                    {/* <input
                                         type="checkbox"
                                         checked={selectedFiles.includes(file.id)}
                                         onChange={(e) => {
@@ -404,7 +425,47 @@ function Drive() {
                                             // }
                                         }}
                                         className="absolute top-2 accent-[#374A8C] w-4 h-4 right-2 z-10"
-                                    />
+                                    /> */}
+                                    {file.url && <div className="absolute top-2 right-2 z-10" ref={menuRef}>
+                                        <MoreVerticalIcon
+                                            size={15}
+                                            className="accent-[#374A8C] cursor-pointer"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIsOpen(file.id);
+                                            }}
+                                        />
+
+                                        {isOpen === file.id && (
+                                            <div className="absolute right-0 mt-1 w-38 bg-white shadow-md border border-gray-200 rounded-md py-1">
+                                                <button
+                                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDownload(file.url, file.name)
+                                                        setIsOpen("");
+                                                    }}
+                                                >
+                                                    <div> <MdOutlineFileDownload /></div>
+                                                    Download
+                                                </button>
+                                                <button
+                                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate("/dashboard/chat")
+                                                        dispatch(getDraftUrl(file))
+                                                        setIsOpen("");
+                                                        console.log("Share clicked");
+                                                    }}
+                                                >
+                                                    <div> <IoChatbubbleOutline />
+                                                    </div>
+                                                    Ask to Chat
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>}
                                 </>
 
                                 {viewMode === "grid" ? (

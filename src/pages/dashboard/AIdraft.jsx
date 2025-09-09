@@ -20,7 +20,7 @@ function AIDraftReview() {
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [loading, setLoading] = useState(true)
-  const [pageLoading, setPageLoading] = useState(true)
+  const [pageLoading, setPageLoading] = useState(false)
   const [message, setMessage] = useState("")
   const [draftLoading, setDraftLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")

@@ -191,28 +191,28 @@ function Home() {
               <h3 className="text-lg font-semibold">Quick Actions</h3>
               <p className="text-teal-700 mt-1">Streamline your workflows with automated email notifications</p>
             </div>
-            <div className="p-6 flex flex-wrap gap-4">
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <button className="flex items-center bg-gradient-to-r from-violet-200 to-purple-300 text-gray-900 px-6 py-3 rounded-xl hover:from-violet-300 hover:to-purple-400 transform hover:scale-105 transition-all duration-200 shadow-md">
                 <div className="bg-white/40 p-1 rounded-md mr-3">
-                  <Bot className="w-4 h-4" />
+                  <Bot />
                 </div>
                 Generate AI Draft
               </button>
               <button className="flex items-center bg-gradient-to-r from-blue-200 to-indigo-300 text-gray-900 px-6 py-3 rounded-xl hover:from-blue-300 hover:to-indigo-400 transform hover:scale-105 transition-all duration-200 shadow-md">
                 <div className="bg-white/40 p-1 rounded-md mr-3">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar />
                 </div>
                 Schedule Reminder
               </button>
               <button className="flex items-center bg-gradient-to-r from-emerald-200 to-teal-300 text-gray-900 px-6 py-3 rounded-xl hover:from-emerald-300 hover:to-teal-400 transform hover:scale-105 transition-all duration-200 shadow-md">
                 <div className="bg-white/40 p-1 rounded-md mr-3">
-                  <FileText className="w-4 h-4" />
+                  <FileText />
                 </div>
                 Review Documents
               </button>
               <button className="flex items-center bg-gradient-to-r from-orange-200 to-red-300 text-gray-900 px-6 py-3 rounded-xl hover:from-orange-300 hover:to-red-400 transform hover:scale-105 transition-all duration-200 shadow-md">
                 <div className="bg-white/40 p-1 rounded-md mr-3">
-                  <Mail className="w-4 h-4" />
+                  <Mail />
                 </div>
                 Check Email Queue
               </button>

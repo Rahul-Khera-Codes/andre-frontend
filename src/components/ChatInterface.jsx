@@ -17,6 +17,8 @@ import { deleteChatHistory, getChatHistory, summarizeFiles } from "../apis/fileu
 import chatInstance from "../apis/chatInstance"
 import { GiHamburgerMenu } from "react-icons/gi"
 import Loader from "./loader"
+import { useDispatch, useSelector } from "react-redux"
+import { discardDraftUrl } from '../store/draftShareUrlSlice'
 
 const BRAND = {
     primary: "#455793",
@@ -44,14 +46,51 @@ export function ChatInterface() {
     const [fileError, setFileError] = useState("")
     const fileInputRef = useRef(null)
     const newSocketRef = useRef(null)
+    const dispatch = useDispatch()
 
     const newwebsocketurl = `${chatInstance}/chat-llm`
 
     const messagesEndRef = useRef(null)
 
+    const draftUrl = useSelector((state) => state.draftUrl)
+
+    useEffect(() => {
+        if (draftUrl?.data?.name) {
+            newChat()
+            uploadUrl()
+        }
+
+    }, [draftUrl?.data?.name])
+
     useEffect(() => {
         fecthHistoryChats()
     }, [])
+
+    const uploadUrl = async () => {
+        setUploadingStatus(true)
+        setFileError("")
+        try {
+            const response = await summarizeFiles(payload, `?dlink=${encodeURIComponent(draftUrl.data['@microsoft.graph.downloadUrl'])}`)
+            if (response?.status === 202) {
+                setSelectedFile({
+                    name: draftUrl.data.name,
+                    size: draftUrl.data.size,
+                    type: draftUrl.data.type,
+                    url: draftUrl.data?.['@microsoft.graph.downloadUrl']
+                })
+            } else {
+                setFileError(response?.response?.data.error || "Internal Server Error! Please share again")
+
+            }
+
+        } catch (error) {
+            setFileError("Internal Server Error!")
+            console.log(error)
+        } finally {
+            setUploadingStatus(false)
+            dispatch(discardDraftUrl())
+        }
+    }
 
     const fecthHistoryChats = async (query = "") => {
         try {

@@ -23,6 +23,7 @@ import { addCalandarEvents, getCalandarEvents, updateCalandarEvents } from "../.
 import Loader from "../../components/loader"
 import Header from "../../components/Header"
 import CustomInputField from "../../components/CustomInputField"
+import { IoClose } from "react-icons/io5"
 
 const mockReminders = [
   {
@@ -71,10 +72,13 @@ function CalendarManagement() {
   const [selectedPriority, setSelectedPriority] = useState("all")
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [eventLoading, setEventLoading] = useState(false)
+  const [eventError, setEventError] = useState("")
   const [message, setMessage] = useState("")
   const [calendarEvents, setCalendarEvents] = useState([])
-  const [pageLoading, setPageLoading] = useState(true)
+  const [pageLoading, setPageLoading] = useState(false)
   const [selectedEventId, setSelectedEventId] = useState("")
+  const [errors, setErrors] = useState({})
 
   const [filteredDrafts, setFilteredDrafts] = useState([])
   const [newReminder, setNewReminder] = useState({
@@ -95,18 +99,50 @@ function CalendarManagement() {
     }))
   }
 
+
+  const validateForm = () => {
+    const newErrors = {}
+
+    if (!newReminder.subject) newErrors.subject = "Subject is required"
+    if (!newReminder.body) newErrors.body = "Body is required"
+    if (!newReminder.location) newErrors.location = "Location is required"
+    if (!newReminder.start) newErrors.start = "Start date is required"
+    if (!newReminder.end) newErrors.end = "End date is required"
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+
   const handleCreateReminder = async () => {
     console.log("Reminder created:", newReminder)
+    if (!validateForm()) return
+    setEventError("")
+    setEventLoading(true)
     try {
       const response = selectedEventId ? await updateCalandarEvents(selectedEventId, updateReminder) : await addCalandarEvents(newReminder)
       console.log(response)
       if (response?.status === 201) {
         setIsOpen(false)
         fetchCalendarEvents()
+        setNewReminder({
+          subject: "",
+          start: "",
+          end: "",
+          body: "",
+          location: "",
+        })
+        setUpdateRemainder({})
+      } else {
+        setEventError(response?.response?.data?.error || response?.message || "Internal Server Error")
       }
 
     } catch (error) {
       console.log(error)
+      setEventError("Internal Server Error")
+
+    } finally {
+      setEventLoading(false)
     }
   }
 
@@ -299,7 +335,7 @@ function CalendarManagement() {
     <div className="space-y-6 h-full w-full p-3 overflow-auto bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
       <Header header={"Calendar Events"} description={"Trigger task reminders via email, in-app alerts, or chat integrations"} buttonStatus={true} handler={setIsOpen} />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {
           [{ label: "Active Reminders", key: "active", icon: Bell, gradientColor: `from-blue-500 to-blue-600` },
           { label: "Overdue", key: "overdue", icon: AlertTriangle, gradientColor: `from-red-500 to-pink-500` },
@@ -322,7 +358,7 @@ function CalendarManagement() {
       </div>
 
       <div className="p-6 bg-white rounded-2xl shadow-lg border border-gray-100 flex gap-3">
-        <CustomInputField placeholder={"Search Events..."} search={searchQuery} setSearch={setSearchQuery} extraStyles={`w-1/2`} />
+        <CustomInputField placeholder={"Search Events..."} search={searchQuery} setSearch={setSearchQuery} extraStyles={`md:w-1/2 w-full`} />
       </div>
 
       <div className="space-y-2">
@@ -339,8 +375,8 @@ function CalendarManagement() {
                     onClick={() => {
                       setNewReminder({
                         subject: email.subject,
-                        start: email.start.dateTime,
-                        end: email.end.dateTime,
+                        start: new Date(email.start.dateTime),
+                        end: new Date(email.end.dateTime),
                         body: email.body.content,
                         location: email.location.displayName,
                       })
@@ -393,83 +429,106 @@ function CalendarManagement() {
 
         {isOpen && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 backdrop-blur-sm">
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl w-full max-h-[90vh] overflow-auto max-w-2xl p-8 space-y-6 border border-gray-200">
-              <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                {(newReminder?.start) ? 'Update' : 'Create'} New Reminder
+            <div className="bg-gradient-to-br relative from-white to-gray-50 rounded-3xl shadow-2xl w-full max-h-[90vh] overflow-auto max-w-2xl p-8 space-y-6 border border-gray-200">
+              <div className="absolute right-2 top-3">
+                <IoClose size={20} className="cursor-pointer" onClick={() => {
+                  setIsOpen(false)
+                  setNewReminder({
+                    subject: "",
+                    start: "",
+                    end: "",
+                    body: "",
+                    location: "",
+                  })
+                  setUpdateRemainder({})
+                  setEventError("")
+                }} />
+              </div>
+
+              <div className="text-2xl text-center font-bold text-[#374A8C]  ">
+                {(newReminder?.start) ? 'Update' : 'Create'} New Event
               </div>
 
               <div>
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Subject</label>
                   <input
-                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200"
                     value={newReminder.subject}
                     onChange={(e) => {
                       setNewReminder((prev) => ({ ...prev, subject: e.target.value }))
                       setUpdateRemainder((prev) => ({ ...prev, subject: e.target.value }))
+                      setErrors((prev) => ({ ...prev, subject: "" }))
                     }}
                     placeholder="Reminder subject..."
+                    className="pl-2 border-1 border-gray-200 bg-gray-50 focus:border-[#36509A] focus:bg-white focus:outline-none  rounded-xl w-full py-3 text-sm transition-all duration-200"
                   />
                 </div>
+                {errors?.subject && <p className="text-red-500 p-2">{errors.subject}</p>}
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Start Date & Time</label>
-                  <input
-                    type="datetime-local"
-                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200"
-                    value={newReminder.start ? new Date(newReminder.start).toISOString().slice(0, 16) : ""}
-                    onChange={(e) => {
-                      const localEnd = e.target.value;
-                      const utcStart = new Date(localEnd).toISOString();
-                      setNewReminder((prev) => ({ ...prev, start: utcStart }))
-                      setUpdateRemainder((prev) => ({ ...prev, start: utcStart }))
+                  <CustomDatePicker
+                    value={newReminder.start}
+                    onChange={(value) => {
+                      // const localEnd = value;
+                      // const utcStart = new Date(localEnd).toISOString();
+                      setNewReminder((prev) => ({ ...prev, start: value }))
+                      setUpdateRemainder((prev) => ({ ...prev, start: value }))
+                      setErrors((prev) => ({ ...prev, start: "" }))
                     }}
                   />
+                  {errors?.start && <p className="text-red-500 p-2">{errors.start}</p>}
                 </div>
-                <div className="space-y-2 pt-1">
+                <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">End Date & Time</label>
-                  <input
-                    type="datetime-local"
-                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200"
-                    value={newReminder.end ? new Date(newReminder.end).toISOString().slice(0, 16) : ""}
-                    onChange={(e) => {
-                      const localEnd = e.target.value;
-                      const utcEnd = new Date(localEnd).toISOString();
-                      setNewReminder((prev) => ({ ...prev, end: utcEnd }))
-                      setUpdateRemainder((prev) => ({ ...prev, end: utcEnd }))
+                  <CustomDatePicker
+                    value={newReminder.end}
+                    onChange={(value) => {
+                      // const localEnd = value;
+                      // const utcStart = new Date(localEnd).toISOString();
+                      console.log(value, "vcvczx")
+                      setNewReminder((prev) => ({ ...prev, end: value }))
+                      setUpdateRemainder((prev) => ({ ...prev, end: value }))
+                      setErrors((prev) => ({ ...prev, end: "" }))
                     }}
                   />
+                  {errors?.end && <p className="text-red-500 p-2">{errors.end}</p>}
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">Body</label>
                 <textarea
                   rows={3}
-                  className="w-full rounded-xl border-2 border-gray-200 focus:outline-none resize-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 px-4 py-3 transition-all duration-200"
+                  className="pl-2 border-1 border-gray-200 resize-none bg-gray-50 focus:border-[#36509A] focus:bg-white focus:outline-none  rounded-xl w-full py-3 text-sm transition-all duration-200"
                   value={newReminder.body}
                   onChange={(e) => {
                     setNewReminder((prev) => ({ ...prev, body: e.target.value }))
                     setUpdateRemainder((prev) => ({ ...prev, body: e.target.value }))
+                    setErrors((prev) => ({ ...prev, body: "" }))
                   }}
                   placeholder="Detailed body of the reminder..."
                 />
+                {errors?.body && <p className="text-red-500 p-2">{errors.body}</p>}
               </div>
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">Location</label>
                 <input
-                  className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all duration-200"
+                  className="pl-2 border-1 border-gray-200 bg-gray-50 focus:border-[#36509A] focus:bg-white focus:outline-none  rounded-xl w-full py-3 text-sm transition-all duration-200"
                   value={newReminder.location}
                   onChange={(e) => {
                     setNewReminder((prev) => ({ ...prev, location: e.target.value }))
                     setUpdateRemainder((prev) => ({ ...prev, location: e.target.value }))
+                    setErrors((prev) => ({ ...prev, location: "" }))
                   }}
                   placeholder="Location for the reminder..."
                 />
+                {errors?.location && <p className="text-red-500 p-2">{errors.location}</p>}
               </div>
+              {eventError && <p className="text-red-500 pl-1">{eventError}</p>}
               <div className="flex justify-end gap-4 pt-4">
                 <button
-                  className="px-6 py-3 border-2 border-gray-300 cursor-pointer rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                  className="px-3 py-2 border-2 border-gray-300 cursor-pointer rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                   onClick={() => {
                     setIsOpen(false)
                     setNewReminder({
@@ -481,15 +540,17 @@ function CalendarManagement() {
                     })
                     setUpdateRemainder({})
                     setSelectedEventId("")
+                    setEventError("")
                   }}
                 >
                   Cancel
                 </button>
                 <button
-                  className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 cursor-pointer text-white rounded-xl font-medium hover:from-emerald-600 hover:to-teal-600 shadow-lg transform hover:scale-105 transition-all duration-200"
+                  disabled={eventLoading}
+                  className={`px-3 py-2 bg-[#374A8C] ${eventLoading ? 'cursor-not-allowed' : 'cursor-pointer hover:from-emerald-600 hover:to-teal-600 hover:scale-105'}  text-white rounded-xl font-medium shadow-lg transform transition-all duration-200`}
                   onClick={handleCreateReminder}
                 >
-                  {(newReminder?.start) ? 'Update' : 'Create'} Reminder
+                  {eventLoading ? 'Submitting' : 'Submit'}
                 </button>
               </div>
             </div>

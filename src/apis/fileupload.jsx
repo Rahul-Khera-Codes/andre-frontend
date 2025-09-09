@@ -1,11 +1,11 @@
 import axiosInstance from "./axiosInstance";
 
 
-export const summarizeFiles = async (payload) => {
+export const summarizeFiles = async (payload, query = "") => {
     try {
-        const response = await axiosInstance.post(`/microsoft/summarize/`, payload, {
+        const response = await axiosInstance.post(`/microsoft/summarize/${query}`, payload, {
             headers: {
-                'Content-Type': 'multipart/form-data'
+                'Content-Type': query ? 'application/json' : 'multipart/form-data'
             }
         });
         return response;
@@ -15,7 +15,7 @@ export const summarizeFiles = async (payload) => {
     }
 };
 
-export const getChatHistory = async (payload="") => {
+export const getChatHistory = async (payload = "") => {
     try {
         const response = await axiosInstance.get(`/microsoft/ai/chatbot/history/${payload}`);
         return response;
@@ -25,7 +25,7 @@ export const getChatHistory = async (payload="") => {
     }
 };
 
-export const deleteChatHistory = async (payload="") => {
+export const deleteChatHistory = async (payload = "") => {
     try {
         const response = await axiosInstance.delete(`/microsoft/ai/chatbot/history/${payload}`);
         return response;
