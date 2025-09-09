@@ -442,6 +442,7 @@ function CalendarManagement() {
                   })
                   setUpdateRemainder({})
                   setEventError("")
+                  setErrors({})
                 }} />
               </div>
 
@@ -541,6 +542,7 @@ function CalendarManagement() {
                     setUpdateRemainder({})
                     setSelectedEventId("")
                     setEventError("")
+                    setErrors({})
                   }}
                 >
                   Cancel
