@@ -9,6 +9,8 @@ import { FaRegClock, FaReply } from "react-icons/fa"
 import { MdOutlineContentPasteGo, MdOutlineSummarize } from "react-icons/md"
 import Header from "../../components/Header"
 import CustomInputField from "../../components/CustomInputField"
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi"
+import { IoIosArrowRoundUp } from "react-icons/io"
 
 function AIDraftReview() {
   const [drafts, setDrafts] = useState([])
@@ -24,6 +26,12 @@ function AIDraftReview() {
   const [message, setMessage] = useState("")
   const [draftLoading, setDraftLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalContacts, setTotalContacts] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [sortStatus, setSortStatus] = useState(true);
+
 
   const [filteredDrafts, setFilteredDrafts] = useState([])
 
@@ -51,17 +59,20 @@ function AIDraftReview() {
 
   useEffect(() => {
     fetchEmails()
-  }, [selectedStatus])
+  }, [selectedStatus, currentPage, rowsPerPage, sortStatus])
 
   const fetchEmails = async () => {
     setLoading(true)
     setMessage("")
     try {
-      const response = await getAutomateEmails(selectedStatus)
-      const mails = response?.data
+      const response = await getAutomateEmails(selectedStatus, currentPage, rowsPerPage, sortStatus ? "asc" : "desc")
+      const mails = response?.data?.emails
       console.log(mails)
       if (mails?.length > 0 && mails?.[0]?.message_id) {
         setDrafts(mails)
+        setTotalContacts(response?.data?.pagination?.total_count);
+        setTotalPages(response?.data?.pagination?.total_pages);
+        setCurrentPage(response?.data?.pagination?.page);
       } else {
         setDrafts([])
         setMessage(response?.response?.data?.error ?? response?.message ?? "No Mails Found")
@@ -215,6 +226,7 @@ function AIDraftReview() {
     { label: "Deleted Items", key: "deleted_items" },
     { label: "Sent Items", key: "sent_items" },
   ]
+  const rowsPerPageOptions = [{ label: "10", key: 10 }, { label: "20", key: 20 }, { label: "50", key: 50 }, { label: "75", key: 75 }, { label: "100", key: 100 }]
 
   if (pageLoading) return <Loader />
   return (
@@ -229,18 +241,29 @@ function AIDraftReview() {
           <div className={`space-y-4 w-full`}>
             <div className="bg-white border-2 border-gray-100 flex md:flex-row flex-col gap-4 w-full rounded-2xl p-6 shadow-lg">
               <CustomInputField placeholder={"Search Emails..."} search={searchQuery} setSearch={setSearchQuery} extraStyles={`md:w-1/2 w-full`} />
-              <div className="md:w-1/2 w-full">
-                <SelectDropdown
-                  name="status"
-                  options={statusOptions}
-                  value={selectedStatus}
-                  onChange={(updated) => {
-                    setSelectedStatus(updated)
-                  }}
-                  placeholder="Select"
-                  className="md:w-[204px] w-full"
-                  extraName="Status"
-                />
+              <div className="md:w-1/2 w-full flex gap-4 items-center">
+                <div>
+                  <SelectDropdown
+                    name="status"
+                    options={statusOptions}
+                    value={selectedStatus}
+                    onChange={(updated) => {
+                      setSelectedStatus(updated)
+                    }}
+                    placeholder="Select"
+                    className="md:w-[204px] w-full"
+                    extraName="Status"
+                  />
+                </div>
+                <button
+                  onClick={() => setSortStatus(!sortStatus)}
+                  className="flex gap-1 cursor-pointer items-center"
+                >
+                  Sort By
+                  <span className={`transition-transform duration-200 ${sortStatus ? 'rotate-0' : 'rotate-180'}`}>
+                    <IoIosArrowRoundUp size={20} />
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -250,8 +273,8 @@ function AIDraftReview() {
                 <div className="h-56 w-full">
                   <Loader />
                 </div>
-              ) : !message ? (
-                filteredDrafts?.length > 0 ? (
+              ) : !message ? <>
+                {filteredDrafts?.length > 0 ? (
                   <div className="space-y-4 gap-2 grid md:grid-cols-2">
                     {filteredDrafts.map((email, index) => (
                       <div
@@ -291,7 +314,88 @@ function AIDraftReview() {
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">No Mails Found</h3>
                   </div>
                 )
-              ) : (
+                }
+                <div className="flex justify-between items-center mt-4 px-4 flex-wrap gap-3 w-full">
+                  <div className="flex items-center gap-2 text-[16px] text-[#5A687C]">
+                    <div>
+                      Showing {(currentPage - 1) * rowsPerPage + 1} - {Math.min((currentPage) * rowsPerPage, totalContacts)} of {totalContacts}
+
+                    </div>
+                    |
+                    <span>Rows per page</span>
+                    <SelectDropdown
+                      name="rowsPerPage"
+                      options={rowsPerPageOptions}
+                      value={rowsPerPage}
+                      onChange={(updated) => {
+                        setRowsPerPage(Number(updated));
+                        setCurrentPage(1);
+                      }}
+                      placeholder={"Select"}
+                      className=""
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="text-[#1e1e1e] disabled:cursor-not-allowed cursor-pointer h-[32px] w-[32px] flex justify-center items-center rounded-md border border-[#E1E4EA] hover:text-black disabled:opacity-30"
+                    >
+                      <FiChevronLeft />
+                    </button>
+
+                    {(() => {
+                      const buttons = [];
+                      const visiblePages = 5;
+
+                      if (totalPages <= visiblePages) {
+                        for (let i = 1; i <= totalPages; i++) {
+                          buttons.push(i);
+                        }
+                      } else {
+                        buttons.push(1);
+                        const left = currentPage - 1;
+                        const right = currentPage + 1;
+                        if (currentPage > 3) {
+                          buttons.push("...");
+                        }
+                        for (let i = Math.max(2, left); i <= Math.min(totalPages - 1, right); i++) {
+                          buttons.push(i);
+                        }
+                        if (currentPage < totalPages - 2) {
+                          buttons.push("...");
+                        }
+                        buttons.push(totalPages);
+                      }
+                      return buttons.map((page, index) =>
+                        page === "..." ? (
+                          <span key={`ellipsis-${index}`} className="mx-1 text-gray-500">...</span>
+                        ) : (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`h-[32px] w-[32px] cursor-pointer flex justify-center items-center rounded-md text-[16px] border ${currentPage === page
+                              ? 'bg-[#1B3E89] text-white'
+                              : 'bg-white text-[#5A687C] border-[#E1E4EA]'
+                              }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      );
+                    })()}
+
+
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="text-[#1e1e1e] disabled:cursor-not-allowed cursor-pointer rounded-md  border border-[#E1E4EA] h-[32px] w-[32px] flex justify-center items-center hover:text-black disabled:opacity-30"
+                    >
+                      <FiChevronRight />
+                    </button>
+                  </div>
+                </div>
+              </> : (
                 <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-dashed border-red-200 rounded-2xl p-8 text-center">
                   <div className="bg-gradient-to-r from-red-400 to-pink-500 p-4 rounded-2xl w-fit mx-auto mb-4">
                     <Mail className="w-16 h-16 text-white" />

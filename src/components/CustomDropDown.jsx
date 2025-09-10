@@ -24,9 +24,9 @@ export const SelectDropdown = ({ name, options, placeholder = 'Select', value, o
             const spaceBelow = window.innerHeight - rect.bottom;
             const spaceAbove = rect.top;
             if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
-                // setOpenUpward(true);
+                setOpenUpward(true);
             } else {
-                // setOpenUpward(false);
+                setOpenUpward(false);
             }
         }
     }, [isOpen]);

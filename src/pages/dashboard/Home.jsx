@@ -68,7 +68,7 @@ function Home() {
 
           <Header header={` Welcome back, ${userDetails?.user?.given_name?.[0].toUpperCase() + userDetails?.user?.given_name?.slice(1) || "Test"}`} description={"You have 12 pending email automations and 8 active tasks requiring attention."} />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 title: "Active Tasks",
