@@ -117,7 +117,7 @@ function Drive() {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
-                //setIsOpen("");
+                setIsOpen("");
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -396,6 +396,7 @@ function Drive() {
                                     ? "bg-white rounded-xl p-4 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer"
                                     : "bg-white rounded-lg p-3 border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer flex items-center space-x-3"
                                     }`}
+                                onMouseLeave={() => setIsOpen("")}
                                 onClick={async () => {
                                     await fetchFiles(`?folder_id=${file.id}`)
                                     setFullPath((prev) => ([
@@ -426,7 +427,7 @@ function Drive() {
                                         }}
                                         className="absolute top-2 accent-[#374A8C] w-4 h-4 right-2 z-10"
                                     /> */}
-                                    {file.url && <div className="absolute top-2 right-2 z-10" ref={menuRef}>
+                                    {file.url && <div className="absolute top-2 right-2">
                                         <MoreVerticalIcon
                                             size={15}
                                             className="accent-[#374A8C] cursor-pointer"
