@@ -76,7 +76,7 @@ function Sidebar({ openSidebar, showSidebar, setShowSidebar }) {
               className={`relative flex items-center ${(openSidebar || showSidebar) ? 'px-3' : 'justify-center'} w-full h-11 group transition-all rounded-md px-3 cursor-pointer
                   ${currentPath() === item.href
                   ? "bg-gradient-to-r from-[#374A8C] to-[#73B1DE] text-white shadow-md"
-                  : "hover:bg-slate-100 text-slate-700"}
+                  : "hover:bg-[#dde5ec] text-slate-700"}
                 `}
             >
               <item.icon className={`w-5 h-5 ${(openSidebar || showSidebar) && 'mr-3'}  ${currentPath() === item.href ? 'text-white' : 'text-slate-700'}`} />
