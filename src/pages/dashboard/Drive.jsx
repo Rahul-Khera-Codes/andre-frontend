@@ -29,6 +29,7 @@ import { IoChatbubbleOutline } from "react-icons/io5"
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import { getDraftUrl } from '../../store/draftShareUrlSlice'
+import { format, parseISO } from "date-fns"
 
 function Drive() {
     const [files, setFiles] = useState([])
@@ -440,12 +441,13 @@ function Drive() {
                                         {isOpen === file.id && (
                                             <div className="absolute right-0 mt-1 w-38 bg-white shadow-md border border-gray-200 rounded-md py-1 z-30">
                                                 <button
-                                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    className="flex cursor-not-allowed items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleDownload(file.url, file.name)
                                                         setIsOpen("");
                                                     }}
+                                                    disabled
                                                 >
                                                     <div> <MdOutlineFileDownload /></div>
                                                     Download
@@ -495,7 +497,7 @@ function Drive() {
                                                 {file.name}
                                             </p>
                                             <p className="text-sm text-slate-500">
-                                                {file.type === "folder" ? "Folder" : file.size} • {file.modified}
+                                                {file.type === "folder" ? "Folder" : file.size} • {format(parseISO(file.modified), 'yyyy-MM-dd HH:mm:ss')}
                                             </p>
                                         </div>
                                     </>
