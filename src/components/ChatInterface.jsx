@@ -516,7 +516,7 @@ export function ChatInterface() {
                 <main className="flex-1 flex flex-col">
 
                     <div
-                        className="px-4 py-3 border-b rounded-tr-xl rounded- flex items-center gap-3"
+                        className={`px-4 py-3 ${!historyStatus && 'rounded-tl-xl'} border-b rounded-tr-xl rounded- flex items-center gap-3`}
                         style={{ borderColor: BRAND.border, backgroundColor: BRAND.white }}
                     >
                         <div onClick={() => setHistoryStatus(!historyStatus)} className="cursor-pointer">
@@ -703,8 +703,8 @@ export function ChatInterface() {
                             </p>
                         </div>}
 
-                        <div className="flex items-end gap-2">
-                            <div className="flex items-center gap-1">
+                        <div className="flex items-end relative gap-2">
+                            <div className="flex absolute bottom-[-8px] items-center gap-1">
                                 <input type="file" ref={fileInputRef} className="hidden" onChange={onFileChange} aria-hidden="true" />
                                 <button
                                     type="button"
@@ -723,16 +723,16 @@ export function ChatInterface() {
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={handleKeyDown}
                                     placeholder="Ask the assistant…"
-                                    className="w-full resize-none rounded-lg px-3 py-2 focus:outline-none"
+                                    className="w-full resize-none rounded-lg pl-3 pr-8 py-2 border border-gray-200 bg-gray-50 focus:border-[#36509A] focus:bg-white focus:outline-none transition-all duration-200"
                                     rows={2}
                                     style={{
-                                        border: `1px solid ${BRAND.border}`,
-                                        backgroundColor: BRAND.white,
+                                        // border: `1px solid ${BRAND.border}`,
+                                        // backgroundColor: BRAND.white,
                                         color: BRAND.primary,
                                     }}
                                     aria-label="Message input"
                                 />
-                                <p className="text-xs mt-1" style={{ color: BRAND.textMuted }}>
+                                <p className="text-xs mt-1 pl-10" style={{ color: BRAND.textMuted }}>
                                     Press Enter to send • Shift+Enter for a new line
                                 </p>
                             </div>
@@ -740,14 +740,14 @@ export function ChatInterface() {
                             <button
                                 onClick={handleSend}
                                 disabled={(!input.trim() && !selectedFile) || isLoading}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-white disabled:opacity-60"
+                                className="inline-flex absolute right-1 top-3 items-center justify-center gap-2 rounded-lg w-10 h-10 text-white disabled:opacity-60"
                                 style={{
                                     backgroundImage: "linear-gradient(180deg, rgba(69,87,147,0.95), rgba(69,87,147,0.85))",
                                 }}
                                 aria-label="Send message"
                             >
                                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                <span className="text-sm">Send</span>
+                                {/* <span className="text-sm">Send</span> */}
                             </button>
                         </div>
                     </div>}
