@@ -427,7 +427,7 @@ function Drive() {
                                         }}
                                         className="absolute top-2 accent-[#374A8C] w-4 h-4 right-2 z-10"
                                     /> */}
-                                    {file.url && <div className="absolute top-2 right-2 z-10">
+                                    {file.url && <div className="absolute top-2 right-2">
                                         <MoreVerticalIcon
                                             size={15}
                                             className="accent-[#374A8C] cursor-pointer"
@@ -438,7 +438,7 @@ function Drive() {
                                         />
 
                                         {isOpen === file.id && (
-                                            <div className="absolute right-0 mt-1 w-38 bg-white shadow-md border border-gray-200 rounded-md py-1">
+                                            <div className="absolute right-0 mt-1 w-38 bg-white shadow-md border border-gray-200 rounded-md py-1 z-30">
                                                 <button
                                                     className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                     onClick={(e) => {
