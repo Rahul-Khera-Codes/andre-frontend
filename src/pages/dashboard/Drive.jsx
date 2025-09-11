@@ -427,7 +427,7 @@ function Drive() {
                                         }}
                                         className="absolute top-2 accent-[#374A8C] w-4 h-4 right-2 z-10"
                                     /> */}
-                                    {file.url && <div className="absolute top-2 right-2">
+                                    {file.url && <div className="absolute top-2 right-2 z-10">
                                         <MoreVerticalIcon
                                             size={15}
                                             className="accent-[#374A8C] cursor-pointer"
