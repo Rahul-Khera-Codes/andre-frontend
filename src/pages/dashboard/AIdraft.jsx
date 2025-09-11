@@ -249,6 +249,8 @@ function AIDraftReview() {
                     value={selectedStatus}
                     onChange={(updated) => {
                       setSelectedStatus(updated)
+                      setCurrentPage(1)
+                      setRowsPerPage(10)
                     }}
                     placeholder="Select"
                     className="md:w-[204px] w-full"
