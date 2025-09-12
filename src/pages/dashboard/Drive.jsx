@@ -399,11 +399,13 @@ function Drive() {
                                     }`}
                                 onMouseLeave={() => setIsOpen("")}
                                 onClick={async () => {
-                                    await fetchFiles(`?folder_id=${file.id}`)
-                                    setFullPath((prev) => ([
-                                        ...prev, { key: file.id, label: `${file.name} ` }
-                                    ]))
-                                    setCurrentPath({ key: file.id, label: file.name })
+                                    if (file.type === "folder") {
+                                        await fetchFiles(`?folder_id=${file.id}`)
+                                        setFullPath((prev) => ([
+                                            ...prev, { key: file.id, label: `${file.name} ` }
+                                        ]))
+                                        setCurrentPath({ key: file.id, label: file.name })
+                                    }
                                 }}
                             >
                                 <>
